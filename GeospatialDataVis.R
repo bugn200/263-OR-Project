@@ -3,10 +3,12 @@ library(sf)
 library(spData)
 library (tidyverse)
 library(tmap)
+library(mapedit)
+library(leaflet)
 #Read Supermarket location data from the csv
-supermarket=read.csv('data/WoolworthsLocations.csv')
+supermarket_raw=read.csv('data/WoolworthsLocations.csv')
 #Convert Longitude and Latitude to be a geometry, using EPSG 4326 system
-supermarket=st_as_sf(supermarket,coords=c("Long","Lat"),crs=4326)
+supermarket=st_as_sf(supermarket_raw,coords=c("Long","Lat"),crs=4326)
 #Transform coordinate into NZGD2000 coordinate system
 supermarket=st_transform(supermarket,2193)
 #Set tmap mode to plot
@@ -31,3 +33,7 @@ data_vis_sat=tm_shape(akl_shape)+tm_polygons()+tm_shape(saturday)+tm_dots(col='T
                                                                                                                          title.position = c('right', 'top'),legend.frame = TRUE)
 #Save the plot as png
 tmap_save(data_vis_sat,'Plot/Saturday.png')
+#Create an interactive map for the supermarket data set to draw polygon for the path
+colorFac = colorFactor("Dark2",supermarket_raw$type)
+path=leaflet(supermarket_raw) %>% addTiles() %>%
+  addCircleMarkers(radius=5,color=~colorNum(supermarket_raw$Type))%>%editMap()
