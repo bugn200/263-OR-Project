@@ -16,7 +16,7 @@ tmap_mode("plot")
 #Read the shape file for New Zealand for territorial authorities
 nz_shape=st_read("Shape_files/TA_2018_clipped")
 #Get the shape of Auckland
-akl_shape=nz_shape|>filter(TA2018_V_1=="Auckland")
+akl_shape=nz_shape| filter(TA2018_V_1=="Auckland")
 #Crop the map for the area of interest
 akl_shape=st_crop(akl_shape,xmin=1740000,xmax=1781000,ymin=5890000,ymax=5940000)
 #Initially visualise data for weekdays
