@@ -36,4 +36,4 @@ tmap_save(data_vis_sat,'Plot/Saturday.png')
 #Create an interactive map for the supermarket data set to draw polygon for the path
 colorFac = colorFactor("Dark2",supermarket_raw$type)
 path=leaflet(supermarket_raw) %>% addTiles() %>%
-  addCircleMarkers(radius=5,color=~colorNum(supermarket_raw$Type))%>%editMap()
+  addCircleMarkers(radius=5,color=~colorFac(supermarket_raw$Type))%>%editMap()
