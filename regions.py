@@ -38,15 +38,15 @@ North = []
 Central = []
 # put each store into their respective region array
 for index, row in dfRegions.iterrows():
-    if row['Region'] == 'South':
+    if row['Region'] == 'South' and row['Store'] != 'Distribution Centre Auckland':
         South.append(row['Store'])
-    elif row['Region'] == 'East':
+    elif row['Region'] == 'East' and row['Store'] != 'Distribution Centre Auckland':
         East.append(row['Store'])
-    elif row['Region'] == 'West':
+    elif row['Region'] == 'West' and row['Store'] != 'Distribution Centre Auckland':
         West.append(row['Store'])
-    elif row['Region'] == 'North':
+    elif row['Region'] == 'North' and row['Store'] != 'Distribution Centre Auckland':
         North.append(row['Store'])
-    else: 
+    elif  row['Region'] == 'Central' and row['Store'] != 'Distribution Centre Auckland':
         Central.append(row['Store'])
 
 # get route permutations of stores in each region
@@ -54,7 +54,7 @@ combSouth = list(permutations(South, 4))
 combEast = list(permutations(East, 4))
 combWest = list(permutations(West, 5))
 combNorth = list(permutations(North, 3))
-combCentral = list(permutations(Central, 4))
+combCentral = list(permutations(Central, 3))
 
 # intialise array with all route permutations for each region
 combRegions = [combSouth, combEast, combWest, combNorth, combCentral]
@@ -77,8 +77,9 @@ for region in combRegions:
         duration = len(region[0]) * 7.5 * 60 + dfDurations['Distribution Centre Auckland'][region[i][0]] + dfDurations['Distribution Centre Auckland'][region[i][-1]]
         for j in range(len(region[0]) - 2):
             duration = duration + dfDurations[region[i][j]][region[i][j + 1]]
-        if duration > 10000:
+        if duration > 14400:
             region.pop(i)
+
 
 # initialise route array
 routes = []
@@ -90,6 +91,6 @@ for region in combRegions:
 # print routes
 for route in routes:
     print(route)
-    
+
 # print number of routes
 print(len(routes))
