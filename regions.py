@@ -147,7 +147,7 @@ lpMat = list(zip(lpMatIndex, lpMatRoutes, lpMatCosts))
 # create and solve the weekday lp
 ######################################################################################################################################################################
 
-probWeekday =  LpProblem("WoolworthsLP", LpMinimize)
+probWeekday =  LpProblem("WoolworthsLpWeekday", LpMinimize)
 
 routes_vars = {Route[1]: LpVariable("X_" + str(Route[0]), lowBound = 0, upBound = 1, cat = 'Binary') for Route in lpMat}
 
@@ -192,6 +192,9 @@ for i in chosen:
 # The optimised objective function (minimum cost for deliveries) printed to screen
 print("")    
 print("Minimised Cost for Weedays  =  $", round(value(probWeekday.objective), 2))
+print("")    
+print("")    
+print("")    
 
 
 # Get all possible feasible routes for saturday in each region using permutations and constraints
@@ -308,7 +311,7 @@ lpMatSaturday = list(zip(lpMatIndexSaturday, lpMatRoutesSaturday, lpMatCostsSatu
 # create and solve the saturday lp
 ######################################################################################################################################################################
 
-probSaturday =  LpProblem("WoolworthsLP", LpMinimize)
+probSaturday =  LpProblem("WoolworthsLpSaturday", LpMinimize)
 
 routes_vars_saturday = {Route[1]: LpVariable("X_" + str(Route[0]), lowBound = 0, upBound = 1, cat = 'Binary') for Route in lpMatSaturday}
 
