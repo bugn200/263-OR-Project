@@ -1,5 +1,5 @@
 # 263-OR-Project
-This is our project for ENGSCI 263 Operation Research
+This is our project for ENGSCI263 Operations Research.
 
 ## Group Model and Initial Results
 
