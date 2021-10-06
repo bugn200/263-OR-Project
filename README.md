@@ -8,8 +8,8 @@ WoolworthsLp.py. This should give identical results to those seen in our Group M
 
 For weekdays, you should get the results shown below,
 
-![lpweekday.png](/lpweekday.png)
+![lpweekday.PNG](/lpweekday.PNG)
 
 and for Saturday, you should get the following results.
 
-![lpsaturday.png](/lpsaturday.png)
+![lpsaturday.PNG](/lpsaturday.PNG)
