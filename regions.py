@@ -3,7 +3,7 @@ import pandas as pd
 from itertools import permutations
 from pulp import *
 
-# Read in data and format into regions
+# Read in data and format into regions for weedays and weekends
 ######################################################################################################################################################################
 
 # read in data as pandas dataframes
@@ -50,11 +50,11 @@ for index, row in dfRegions.iterrows():
         West.append(row['Store'])
     elif row['Region'] == 'North' and row['Store'] != 'Distribution Centre Auckland':
         North.append(row['Store'])
-    elif  row['Region'] == 'Central' and row['Store'] != 'Distribution Centre Auckland':
+    elif row['Region'] == 'Central' and row['Store'] != 'Distribution Centre Auckland':
         Central.append(row['Store'])
 
 
-# Get all possible feasible routes in each region using permutations and constraints
+# Get all possible feasible routes for the weekdays in each region using permutations and constraints
 ######################################################################################################################################################################
 
 # get route permutations of stores in each region
@@ -123,7 +123,7 @@ for route in feasibleRoutes:
 
 # if any missing stores, code is exited
 if missingStores != []:
-    print("Not all stores are accounted for!")
+    print("Not all stores are accounted for (Weekday)!")
     exit()
 
 # initialise arrays for the lp
@@ -144,35 +144,35 @@ for i in range(len(feasibleRoutes)):
 lpMat = list(zip(lpMatIndex, lpMatRoutes, lpMatCosts))
 
 
-# create and solve the lp
+# create and solve the weekday lp
 ######################################################################################################################################################################
 
-prob =  LpProblem("WoolworthsLP", LpMinimize)
+probWeekday =  LpProblem("WoolworthsLP", LpMinimize)
 
 routes_vars = {Route[1]: LpVariable("X_" + str(Route[0]), lowBound = 0, upBound = 1, cat = 'Binary') for Route in lpMat}
 
 # Objective function
-prob += lpSum(routes_vars[lpMat[i][1]] * lpMat[i][2] for i in range(len(routes_vars))), "Total Cost of Daily Delivering"
+probWeekday += lpSum(routes_vars[lpMat[i][1]] * lpMat[i][2] for i in range(len(routes_vars))), "Total Cost of Daily Delivering"
 
 # Constraints added to prob
 for store in allStores:   
-    prob += lpSum(routes_vars[lpMat[i][1]] for i in range(len(routes_vars)) if store in lpMat[i][1]) == 1  # constraint that each store must be visited once
+    probWeekday += lpSum(routes_vars[lpMat[i][1]] for i in range(len(routes_vars)) if store in lpMat[i][1]) == 1  # constraint that each store must be visited once
 
-print(prob)
+print(probWeekday)
 
 # Write the lp to a file
-prob.writeLP('WoolworthsLP')
+probWeekday.writeLP('WoolworthsLpWeekday')
 
 # Solving the problem
-prob.solve()
+probWeekday.solve()
 
 # The status of the solution is printed to the screen
-print("Status:", LpStatus[prob.status])
+print("Status:", LpStatus[probWeekday.status])
 print("")  
 
 # Each of the chosen routes is added to an array
 chosenRouteNums = []
-for v in prob.variables():
+for v in probWeekday.variables():
     if v.varValue == 1:
         chosenRouteNums.append(v.name)
 
@@ -191,6 +191,167 @@ for i in chosen:
 
 # The optimised objective function (minimum cost for deliveries) printed to screen
 print("")    
-print("Minimised Cost  =  $", round(value(prob.objective), 2))
+print("Minimised Cost for Weedays  =  $", round(value(probWeekday.objective), 2))
+
+
+# Get all possible feasible routes for saturday in each region using permutations and constraints
+######################################################################################################################################################################
+
+
+SouthSaturday = []
+EastSaturday = []
+WestSaturday = []
+NorthSaturday = []
+CentralSaturday = []
+# put each store into their respective region array
+for index, row in dfRegions.iterrows():
+    if row['Region'] == 'South' and 'Countdown' in row['Store'] and 'Metro' not in row['Store']:
+        SouthSaturday.append(row['Store'])
+    elif row['Region'] == 'East' and 'Countdown' in row['Store'] and 'Metro' not in row['Store']:
+        EastSaturday.append(row['Store'])
+    elif row['Region'] == 'West' and 'Countdown' in row['Store'] and 'Metro' not in row['Store']:
+        WestSaturday.append(row['Store'])
+    elif row['Region'] == 'North' and 'Countdown' in row['Store'] and 'Metro' not in row['Store']:
+        NorthSaturday.append(row['Store'])
+    elif row['Region'] == 'Central' and 'Countdown' in row['Store'] and 'Metro' not in row['Store']:
+        CentralSaturday.append(row['Store'])
+
+
+# get route permutations of stores in each region
+combSouthSaturday5 = list(permutations(SouthSaturday, 5))
+combSouthSaturday4 = list(permutations(SouthSaturday, 4))
+combSouthSaturday3 = list(permutations(SouthSaturday, 3))
+combSouthSaturday2 = list(permutations(SouthSaturday, 2))
+combSouthSaturday1 = list(permutations(SouthSaturday, 1))
+combEastSaturday5 = list(permutations(EastSaturday, 5))
+combEastSaturday4 = list(permutations(EastSaturday, 4))
+combEastSaturday3 = list(permutations(EastSaturday, 3))
+combEastSaturday2 = list(permutations(EastSaturday, 2))
+combEastSaturday1 = list(permutations(EastSaturday, 1))
+combWestSaturday5 = list(permutations(WestSaturday, 5))
+combWestSaturday4 = list(permutations(WestSaturday, 4))
+combWestSaturday3 = list(permutations(WestSaturday, 3))
+combWestSaturday2 = list(permutations(WestSaturday, 2))
+combWestSaturday1 = list(permutations(WestSaturday, 1))
+combNorthSaturday4 = list(permutations(NorthSaturday, 4))
+combNorthSaturday3 = list(permutations(NorthSaturday, 3))
+combNorthSaturday2 = list(permutations(NorthSaturday, 2))
+combNorthSaturday1 = list(permutations(NorthSaturday, 1))
+combCentralSaturday5 = list(permutations(CentralSaturday, 5))
+combCentralSaturday4 = list(permutations(CentralSaturday, 4))
+combCentralSaturday3 = list(permutations(CentralSaturday, 3))
+combCentralSaturday2 = list(permutations(CentralSaturday, 2))
+combCentralSaturday1 = list(permutations(CentralSaturday, 1))
+
+# intialise array with all route permutations for each region
+combRegionsSaturday = [combSouthSaturday5, combSouthSaturday4, combSouthSaturday3, combSouthSaturday2, combSouthSaturday1, combEastSaturday5, combEastSaturday4, combEastSaturday3, combEastSaturday2, combEastSaturday1, combWestSaturday5, combWestSaturday4, combWestSaturday3, combWestSaturday1, combWestSaturday2, combNorthSaturday4, combNorthSaturday3, combNorthSaturday2, combNorthSaturday1, combCentralSaturday5, combCentralSaturday4, combCentralSaturday3, combCentralSaturday2, combCentralSaturday1]
+
+# remove route if total demand exceeds 24 crates
+for region in combRegionsSaturday:
+    for i in range(len(region) - 1, -1, -1):
+        demand = 0
+        for store in region[i]:
+            demand = demand + 4
+        if demand > 26:
+            region.pop(i)
+
+# remove route if total duration exceeds 10000 seconds
+for region in combRegionsSaturday:
+    for i in range(len(region) - 1, -1, -1):
+        duration = len(region[0]) * 7.5 * 60 + dfDurations['Distribution Centre Auckland'][region[i][0]] + dfDurations['Distribution Centre Auckland'][region[i][-1]]
+        for j in range(len(region[0]) - 2):
+            duration = duration + dfDurations[region[i][j]][region[i][j + 1]]
+        if duration > 14400:
+            region.pop(i)
+
+
+# initialise array of feasible routes 
+feasibleRoutesSaturday = []
+# append all feasible routes into array
+for region in combRegionsSaturday:
+    for route in region:
+        feasibleRoutesSaturday.append(route)
+
+# create a list of all stores
+allStoresSaturday = SouthSaturday + NorthSaturday + EastSaturday + WestSaturday + CentralSaturday
+missingStoresSaturday = SouthSaturday + NorthSaturday + EastSaturday + WestSaturday + CentralSaturday
+
+# check if any stores are missing from the feasible routes
+for route in feasibleRoutesSaturday:
+    for store in route:
+        if store in missingStoresSaturday:
+            missingStoresSaturday.remove(store)
+
+# if any missing stores, code is exited
+if missingStoresSaturday != []:
+    print("Not all stores are accounted for (Saturday)!")
+    exit()
+
+# initialise arrays for the lp
+lpMatIndexSaturday = np.zeros((len(feasibleRoutesSaturday)))
+lpMatRoutesSaturday = []
+lpMatCostsSaturday = np.zeros((len(feasibleRoutesSaturday)))
+
+# create the route number and get the cost for each route
+for i in range(len(feasibleRoutesSaturday)):
+    lpMatIndexSaturday[i] = i
+    lpMatRoutesSaturday.append(feasibleRoutesSaturday[i])
+    time = len(feasibleRoutesSaturday[0]) * 7.5 * 60 + dfDurations['Distribution Centre Auckland'][feasibleRoutesSaturday[i][0]] + dfDurations['Distribution Centre Auckland'][feasibleRoutesSaturday[i][-1]]
+    for j in range(len(feasibleRoutesSaturday[i]) - 2):
+        time = time + dfDurations[feasibleRoutesSaturday[i][j]][feasibleRoutesSaturday[i][j + 1]]
+    lpMatCostsSaturday[i] = round(time * 225/3600, 2)
+
+# zip together arrays into one matrix
+lpMatSaturday = list(zip(lpMatIndexSaturday, lpMatRoutesSaturday, lpMatCostsSaturday))
+
+
+# create and solve the saturday lp
+######################################################################################################################################################################
+
+probSaturday =  LpProblem("WoolworthsLP", LpMinimize)
+
+routes_vars_saturday = {Route[1]: LpVariable("X_" + str(Route[0]), lowBound = 0, upBound = 1, cat = 'Binary') for Route in lpMatSaturday}
+
+# Objective function
+probSaturday += lpSum(routes_vars_saturday[lpMatSaturday[i][1]] * lpMatSaturday[i][2] for i in range(len(routes_vars_saturday))), "Total Cost of Delivering on Saturday"
+
+# Constraints added to prob
+for store in allStoresSaturday:   
+    probSaturday += lpSum(routes_vars_saturday[lpMatSaturday[i][1]] for i in range(len(routes_vars_saturday)) if store in lpMatSaturday[i][1]) == 1  # constraint that each store must be visited once
+
+print(probSaturday)
+
+# Write the lp to a file
+probSaturday.writeLP('WoolworthsLpSaturday')
+
+# Solving the problem
+probSaturday.solve()
+
+# The status of the solution is printed to the screen
+print("Status:", LpStatus[probSaturday.status])
+print("")  
+
+# Each of the chosen routes is added to an array
+chosenRouteNumsSaturday = []
+for v in probSaturday.variables():
+    if v.varValue == 1:
+        chosenRouteNumsSaturday.append(v.name)
+
+# The stores of each chosen route are added to an array
+chosenRouteStoresSaturday = []
+keys = list(routes_vars_saturday.items())
+for route_name in chosenRouteNumsSaturday:
+    for key in keys:
+        if route_name == key[1].name:
+            chosenRouteStoresSaturday.append(key[0])
+
+# Both above arrays zipped together and printed
+chosenSaturday = list(zip(chosenRouteNumsSaturday, chosenRouteStoresSaturday))
+for i in chosenSaturday:
+    print(i)
+
+# The optimised objective function (minimum cost for deliveries) printed to screen
+print("")    
+print("Minimised Cost for Saturday  =  $", round(value(probSaturday.objective), 2))
 
 ######################################################################################################################################################################
