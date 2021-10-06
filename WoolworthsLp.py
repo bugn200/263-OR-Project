@@ -7,9 +7,9 @@ from pulp import *
 ######################################################################################################################################################################
 
 # read in data as pandas dataframes
-dfDemands = pd.read_csv('WoolworthsDemands.csv', index_col=0)
-dfDurations = pd.read_csv('WoolworthsTravelDurations.csv', index_col=0)
-dfLocations = pd.read_csv('WoolworthsLocations.csv', index_col=0)
+dfDemands = pd.read_csv('data/WoolworthsDemands.csv', index_col=0)
+dfDurations = pd.read_csv('data/WoolworthsTravelDurations.csv', index_col=0)
+dfLocations = pd.read_csv('data/WoolworthsLocations.csv', index_col=0)
 
 # initialise region array
 region = []
@@ -31,10 +31,10 @@ for index, row in dfLocations.iterrows():
 
 # add regions column to dataframe
 dfLocations['Region'] = region
-dfLocations.to_csv('WoolworthsRegion.csv')
+dfLocations.to_csv('data/WoolworthsRegion.csv')
 
 # read in data and initialise region arrays
-dfRegions = pd.read_csv('WoolworthsRegion.csv')
+dfRegions = pd.read_csv('data/WoolworthsRegion.csv')
 South = []
 East = []
 West = []
