@@ -196,6 +196,26 @@ print("")
 print("")    
 print("")    
 
+#   Save Weekday routes coordinates too a txt
+######################################################################################################################################################################
+
+
+chosenRouteCoords = []
+for route in chosenRouteStores:
+    Route = []
+    for store in route:
+        for i in range(0, len(dfLocations)):
+            if dfLocations.iloc[i, 1] == store:
+                Route.append([dfLocations.iloc[i, 2], dfLocations.iloc[i, 3]])
+    chosenRouteCoords.append(Route)
+
+    
+
+dfRoutes = pd.DataFrame(chosenRouteCoords)
+
+dfRoutes.to_csv('data/WeekdayRoutes.csv')
+
+
 
 # Get all possible feasible routes for saturday in each region using permutations and constraints
 ######################################################################################################################################################################
@@ -356,5 +376,25 @@ for i in chosenSaturday:
 # The optimised objective function (minimum cost for deliveries) printed to screen
 print("")    
 print("Minimised Cost for Saturday  =  $", round(value(probSaturday.objective), 2))
+
+
+#   Save Saturday routes coordinates too a txt
+######################################################################################################################################################################
+
+
+chosenRouteCoordsSaturday = []
+for route in chosenRouteStoresSaturday:
+    Route = []
+    for store in route:
+        for i in range(0, len(dfLocations)):
+            if dfLocations.iloc[i, 1] == store:
+                Route.append([dfLocations.iloc[i, 2], dfLocations.iloc[i, 3]])
+    chosenRouteCoordsSaturday.append(Route)
+
+    
+
+dfRoutes = pd.DataFrame(chosenRouteCoordsSaturday)
+
+dfRoutes.to_csv('data/SaturdayRoutes.csv')
 
 ######################################################################################################################################################################
