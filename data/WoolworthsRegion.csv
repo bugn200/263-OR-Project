@@ -6,7 +6,11 @@ Countdown,Birkenhead,Countdown Birkenhead,-36.81111802,174.7248776,North
 Countdown,Blockhouse Bay,Countdown Blockhouse Bay,-36.92291876,174.7023521,West
 Countdown,Botany Downs,Countdown Botany Downs,-36.92972626,174.9110718,East
 Countdown,Browns Bay,Countdown Browns Bay,-36.71714479,174.7472772,North
+<<<<<<< HEAD
 Countdown,Glenfield,Countdown Glenfield,-36.78148813,174.7234262,West
+=======
+Countdown,Glenfield,Countdown Glenfield,-36.78148813,174.7234262,North
+>>>>>>> 9d450da597756cd47922d77748fa0bb898f9b7b1
 Countdown,Greenlane,Countdown Greenlane,-36.88916156,174.7935037,Central
 Countdown,Grey Lynn,Countdown Grey Lynn,-36.85144346,174.7318719,Central
 Countdown,Grey Lynn Central,Countdown Grey Lynn Central,-36.86311836,174.7385667,Central

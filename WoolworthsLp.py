@@ -7,9 +7,9 @@ from pulp import *
 ######################################################################################################################################################################
 
 # read in data as pandas dataframes
-dfDemands = pd.read_csv('data/WoolworthsDemands.csv', index_col=0)
-dfDurations = pd.read_csv('data/WoolworthsTravelDurations.csv', index_col=0)
-dfLocations = pd.read_csv('data/WoolworthsLocations.csv', index_col=0)
+dfDemands = pd.read_csv('Data\WoolworthsDemands.csv', index_col=0)
+dfDurations = pd.read_csv('Data\WoolworthsTravelDurations.csv', index_col=0)
+dfLocations = pd.read_csv('Data\WoolworthsLocations.csv', index_col=0)
 
 # initialise region array
 region = []
@@ -22,7 +22,7 @@ for index, row in dfLocations.iterrows():
         region.append('East')
     elif row['Lat'] >= -36.94480584 and row['Lat'] < -36.81111802 and row['Long'] < 174.8289359 and row['Long'] >= 174.7105595 and row['Store'] != 'Distribution Centre Auckland':
         region.append('Central')
-    elif row['Lat'] >= -36.81111802 and row['Long'] >= 174.7248776 and row['Store'] != 'Distribution Centre Auckland':
+    elif row['Lat'] >= -36.81111802 and row['Long'] >= 174.7234261 and row['Store'] != 'Distribution Centre Auckland':
         region.append('North')
     elif row['Store'] != 'Distribution Centre Auckland':
         region.append('West')
@@ -31,10 +31,10 @@ for index, row in dfLocations.iterrows():
 
 # add regions column to dataframe
 dfLocations['Region'] = region
-dfLocations.to_csv('data/WoolworthsRegion.csv')
+dfLocations.to_csv('Data\WoolworthsRegion.csv')
 
 # read in data and initialise region arrays
-dfRegions = pd.read_csv('data/WoolworthsRegion.csv')
+dfRegions = pd.read_csv('Data\WoolworthsRegion.csv')
 South = []
 East = []
 West = []
@@ -110,6 +110,9 @@ feasibleRoutes = []
 for region in combRegions:
     for route in region:
         feasibleRoutes.append(route)
+
+print("The number of feasible routes is :", len(feasibleRoutes))
+print("")
 
 # create a list of all stores
 allStores = South + North + East + West + Central
@@ -295,6 +298,8 @@ for region in combRegionsSaturday:
     for route in region:
         feasibleRoutesSaturday.append(route)
 
+print("The number of feasible routes is :", len(feasibleRoutesSaturday))
+print("")
 # create a list of all stores
 allStoresSaturday = SouthSaturday + NorthSaturday + EastSaturday + WestSaturday + CentralSaturday
 missingStoresSaturday = SouthSaturday + NorthSaturday + EastSaturday + WestSaturday + CentralSaturday
