@@ -1,3 +1,5 @@
+from re import I
+import string
 import numpy as np
 import pandas as pd
 from itertools import permutations
@@ -199,7 +201,7 @@ print("")
 print("")    
 print("")    
 
-#   Save Weekday routes coordinates too a txt
+#   Save Weekday routes coordinates too a csv
 ######################################################################################################################################################################
 
 
@@ -218,6 +220,17 @@ dfRoutes = pd.DataFrame(chosenRouteCoords)
 
 dfRoutes.to_csv('data/WeekdayRoutes.csv')
 
+
+#   Save Weekday routes as a txt
+######################################################################################################################################################################
+
+
+textfile = open("data/WeekdayRouteStores.txt", "w")
+for element in chosenRouteStores:
+    for i in element:
+        textfile.write(i)
+    textfile.write("\n")
+textfile.close()
 
 
 # Get all possible feasible routes for saturday in each region using permutations and constraints
@@ -383,7 +396,7 @@ print("")
 print("Minimised Cost for Saturday  =  $", round(value(probSaturday.objective), 2))
 
 
-#   Save Saturday routes coordinates too a txt
+#   Save Saturday routes coordinates as a csv
 ######################################################################################################################################################################
 
 
@@ -401,5 +414,17 @@ for route in chosenRouteStoresSaturday:
 dfRoutes = pd.DataFrame(chosenRouteCoordsSaturday)
 
 dfRoutes.to_csv('data/SaturdayRoutes.csv')
+
+#   Save Saturday routes as a txt
+######################################################################################################################################################################
+
+
+textfile = open("data/SaturdayRouteStores.txt", "w")
+for element in chosenRouteStoresSaturday:
+    for i in element:
+        textfile.write(i)
+    textfile.write("\n")
+textfile.close()
+
 
 ######################################################################################################################################################################
