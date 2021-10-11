@@ -3,12 +3,15 @@ library(spData)
 library (tidyverse)
 library(tmap)
 library(mapedit)
+library(OpenStreetMap)
+library(raster)
+library(rgdal)
 #Read Supermarket location data from the csv
 supermarket_raw=read.csv('data/WoolworthsRegion.csv')
 #Convert Longitude and Latitude to be a geometry, using EPSG 4326 system
-supermarket=st_as_sf(supermarket_raw,coords=c("Long","Lat"),crs=4326)
+supermarket1=st_as_sf(supermarket_raw,coords=c("Long","Lat"),crs=4326)
 #Transform coordinate into NZGD2000 coordinate system
-supermarket=st_transform(supermarket,2193)
+supermarket=st_transform(supermarket1,2193)
 #Set tmap mode to plot
 tmap_mode("plot")
 #Read the shape file for New Zealand for territorial authorities
@@ -35,7 +38,7 @@ tmap_save(data_vis_sat,'Plot/Saturday.png')
 #Get the coordinate of supermarket in each region and the extent coordinates
 South=filter(supermarket,Region%in%c('South','Distribution Centre Auckland'))
 South_shape=st_crop(akl_shape,xmin=1758000,xmax=1777000,ymin=5895000,ymax=5913000)
-North=filter(supermarket,Region%in%c('North','Distribution Centre Auckland'))
+North=filter(supermarket1,Region%in%c('North','Distribution Centre Auckland'))
 North_shape=st_crop(akl_shape,xmin=1751000,xmax=1764000,ymin=5908000,ymax=5936000)
 Central=filter(supermarket,Region%in%c('Central','Distribution Centre Auckland'))
 Central_shape=st_crop(akl_shape,xmin=1750000,xmax=1762500,ymin=5907800,ymax=5922000)
@@ -72,10 +75,13 @@ for(i in 1:length(weekdayRoute)) {
 #change tripMatrix to a dataframe
 tripMatrix=as.data.frame(tripMatrix)
 #Plot the route and save as png
-ggplot(akl_shape)+geom_sf(data=akl_shape,fill='grey')+geom_sf(data=supermarket,
-                                                                            aes(color=Type))+scale_color_brewer(palette="Dark2")+geom_segment(data=tripMatrix,
-                                                                                                                                              aes(x=Long,y=Lat,xend=LongEnd,yend=LatEnd),
-                                                                                                                                                               arrow=arrow(length=unit(0.2,'cm')),alpha=0.3)+labs(title='Weekday Routes')
+ggplot(akl_shape)+
+  geom_sf(data=akl_shape,fill='grey')+
+  geom_sf(data=supermarket,aes(color=Type))+
+  scale_color_brewer(palette="Dark2")+
+  geom_segment(data=tripMatrix,aes(x=Long,y=Lat,xend=LongEnd,yend=LatEnd),
+               arrow=arrow(length=unit(0.2,'cm')),alpha=0.3)+
+  labs(title='Weekday Routes')
 ggsave('Plot/WeekdayRoute.png')
 #Read the route file for Saturday route and save as a png
 saturdayRoute=readLines('data/SaturdayRouteStores.txt')
@@ -103,8 +109,82 @@ for(i in 1:length(saturdayRoute)) {
 #Convert satTrip to a data frame
 satTrip=as.data.frame(satTrip)
 #Plot the map and save it as a png
-ggplot(akl_shape)+geom_sf(data=akl_shape,fill='grey')+geom_sf(data=saturday,
-                                                              aes(color=Type))+scale_color_brewer(palette="Dark2")+geom_segment(data=satTrip,
-                                                                                                                                aes(x=Long,y=Lat,xend=LongEnd,yend=LatEnd),
-                                                                                                                                arrow=arrow(length=unit(0.2,'cm')),alpha=0.3)+labs(title='Saturday Routes')
+ggplot(akl_shape)+
+  geom_sf(data=akl_shape,fill='grey')+
+  geom_sf(data=saturday,aes(color=Type))+
+  scale_color_brewer(palette="Dark2")+
+  geom_segment(data=satTrip,aes(x=Long,y=Lat,xend=LongEnd,yend=LatEnd),
+               arrow=arrow(length=unit(0.2,'cm')),alpha=0.3)+
+  labs(title='Saturday Routes')
 ggsave('Plot/SaturdayRoute.png')
+#Transform all the region shape to 4326 to plot the regional route map
+North_shape=st_transform(North_shape,4326)
+South_shape=st_transform(South_shape,4326)
+East_shape=st_transform(East_shape,4326)
+West_shape=st_transform(West_shape,4326)
+Central_shape=st_transform(Central_shape,4326)
+#Classify region for weekdayRoute
+w=as.data.frame(weekdayRoute)
+colnames(w)='Route'
+w$Region='Unknown'
+#classify region and the route it is in
+for(i in 1:nrow(w)) {
+  #split the string for the route
+  route=str_split(w[i,1],',')
+  w[i,2]=filter(supermarket,Store==route[[1]][1])$Region
+}
+#Put each route region into a new data frame
+North_route=filter(w,Region=='North')
+South_route=filter(w,Region=='South')
+East_route=filter(w,Region=='East')
+West_route=filter(w,Region=='West')
+Central_route=filter(w,Region=='Central')
+#Save the North shape as a raster for reusability
+akl_North=openmap(as.numeric(st_bbox(North_shape))[c(4,1)],as.numeric(st_bbox(North_shape))[c(2,3)],type='osm')
+akl_North=openproj(akl_North)
+North_raster=raster(akl_North)
+North_raster=writeRaster(North_raster,'Shape_files/North.tif',format='GTiff')
+#If the file is available in Shape_files, run this command only
+North_raster=raster('Shape_files/North.tif')
+#Plot the map of the Northern region and the supermarkets
+tm_shape(North_raster)+tm_rgb()+tm_shape(North)+tm_dots(col='Type',palette='Dark2',size=0.3)
+
+#Save the South shape as a raster for reusability
+akl_South=openmap(as.numeric(st_bbox(South_shape))[c(4,1)],as.numeric(st_bbox(South_shape))[c(2,3)],type='osm')
+akl_South=openproj(akl_South)
+South_raster=raster(akl_South)
+South_raster=writeRaster(South_raster,'Shape_files/South.tif',format='GTiff')
+#If the file is available in Shape_files,run this command only
+South_raster=raster('Shape_files/South.tif')
+#Plot the map of the Southern region and the supermarkets
+tm_shape(South_raster)+tm_rgb()+tm_shape(South)+tm_dots(col='Type',palette='Dark2',size=0.3)
+
+#Save the East shape as a raster for reusability
+akl_East=openmap(as.numeric(st_bbox(East_shape))[c(4,1)],as.numeric(st_bbox(East_shape))[c(2,3)],type='osm')
+akl_East=openproj(akl_East)
+East_raster=raster(akl_East)
+East_raster=writeRaster(East_raster,'Shape_files/East.tif',format='GTiff')
+#If the file is available in Shape_files,run this command only
+East_raster=raster('Shape_files/East.tif')
+#Plot the map of the Southern region and the supermarkets
+tm_shape(East_raster)+tm_rgb()+tm_shape(East)+tm_dots(col='Type',palette='Dark2',size=0.3)
+
+#Save the West shape as a raster for reusability
+akl_West=openmap(as.numeric(st_bbox(West_shape))[c(4,1)],as.numeric(st_bbox(West_shape))[c(2,3)],type='osm')
+akl_West=openproj(akl_West)
+West_raster=raster(akl_West)
+West_raster=writeRaster(West_raster,'Shape_files/West.tif',format='GTiff')
+#If the file is saved in Shape_files,run this command only
+West_raster=raster('Shape_files/West.tif')
+#Plot the map of the Southern region and the supermarkets
+tm_shape(West_raster)+tm_rgb()+tm_shape(West)+tm_dots(col='Type',palette='Dark2',size=0.3)
+
+#Save the Central shape as a raster for reusability
+akl_Central=openmap(as.numeric(st_bbox(Central_shape))[c(4,1)],as.numeric(st_bbox(Central_shape))[c(2,3)],type='osm')
+akl_Central=openproj(akl_Central)
+Central_raster=raster(akl_Central)
+Central_raster=writeRaster(Central_raster,'Shape_files/Central.tif',format='GTiff')
+#If the file is saved in Shape_files,run this command only
+Central_raster=raster('Shape_files/Central.tif')
+#Plot the map of the Southern region and the supermarkets
+tm_shape(Central_raster)+tm_rgb()+tm_shape(Central)+tm_dots(col='Type',palette='Dark2',size=0.3)
