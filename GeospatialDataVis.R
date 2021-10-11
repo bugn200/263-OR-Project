@@ -1,10 +1,8 @@
 library(sf)
-library(sf)
 library(spData)
 library (tidyverse)
 library(tmap)
 library(mapedit)
-library(leaflet)
 #Read Supermarket location data from the csv
 supermarket_raw=read.csv('data/WoolworthsRegion.csv')
 #Convert Longitude and Latitude to be a geometry, using EPSG 4326 system
@@ -46,3 +44,67 @@ East_shape=st_crop(akl_shape,xmin=1759000,xmax=1773000,ymin=5908000,ymax=5918500
 West=filter(supermarket,Region%in%c('West','Distribution Centre Auckland'))
 West_shape=st_crop(akl_shape,xmin=1741100,xmax=1762000,ymin=5908000,ymax=5928000)
 
+
+
+#Read the route file for weekday route and save as a png
+weekdayRoute=readLines('data/WeekdayRouteStores.txt')
+#Create a matrix to save data
+tripMatrix=matrix(0,65,4)
+colnames(tripMatrix)=c('Long','Lat','LongEnd','LatEnd')
+#Initialise for the number of node(will be used to plot)
+nodeReach=1
+for(i in 1:length(weekdayRoute)) {
+  #Initialise start point and split the string
+  route=as.vector(st_coordinates(filter(supermarket,Store=='Distribution Centre Auckland')$geometry))
+  weekdayR=strsplit(weekdayRoute[i],split=',')
+  for(j in 1:length(weekdayR[[1]])) {
+    #Add coordinate to the start and the end point of the arrows
+    tripMatrix[,'Long'][nodeReach]=route[1]
+    tripMatrix[,'Lat'][nodeReach]=route[2]
+    #Add coordinate to the end point of arrows
+    route1=as.vector(st_coordinates(filter(supermarket,Store==weekdayR[[1]][j])$geometry))
+    tripMatrix[,'LongEnd'][nodeReach]=route1[1]
+    tripMatrix[,'LatEnd'][nodeReach]=route1[2]
+    route=route1
+    nodeReach=nodeReach+1
+  }
+}
+#change tripMatrix to a dataframe
+tripMatrix=as.data.frame(tripMatrix)
+#Plot the route and save as png
+ggplot(akl_shape)+geom_sf(data=akl_shape,fill='grey')+geom_sf(data=supermarket,
+                                                                            aes(color=Type))+scale_color_brewer(palette="Dark2")+geom_segment(data=tripMatrix,
+                                                                                                                                              aes(x=Long,y=Lat,xend=LongEnd,yend=LatEnd),
+                                                                                                                                                               arrow=arrow(length=unit(0.2,'cm')),alpha=0.3)+labs(title='Weekday Routes')
+ggsave('Plot/WeekdayRoute.png')
+#Read the route file for Saturday route and save as a png
+saturdayRoute=readLines('data/SaturdayRouteStores.txt')
+#Create a matrix to save the data
+satTrip=matrix(0,53,4)
+colnames(satTrip)=c('Long','Lat','LongEnd','LatEnd')
+#Initialise number of node Reach
+nodeReach=1
+for(i in 1:length(saturdayRoute)) {
+  #Initialise the start point and split the string
+  route=as.vector(st_coordinates(filter(supermarket,Store=='Distribution Centre Auckland')$geometry))
+  satRoute=strsplit(saturdayRoute[i],split=',')
+  for(j in 1:length(satRoute[[1]])) {
+    #Add the start point to the matrix
+    satTrip[,'Long'][nodeReach]=route[1]
+    satTrip[,'Lat'][nodeReach]=route[2]
+    #Add the end point coordinate to the matrix
+    route1=as.vector(st_coordinates(filter(supermarket,Store==satRoute[[1]][j])$geometry))
+    satTrip[,'LongEnd'][nodeReach]=route1[1]
+    satTrip[,'LatEnd'][nodeReach]=route1[2]
+    route=route1
+    nodeReach=nodeReach+1
+  }
+}
+#Convert satTrip to a data frame
+satTrip=as.data.frame(satTrip)
+#Plot the map and save it as a png
+ggplot(akl_shape)+geom_sf(data=akl_shape,fill='grey')+geom_sf(data=saturday,
+                                                              aes(color=Type))+scale_color_brewer(palette="Dark2")+geom_segment(data=satTrip,
+                                                                                                                                aes(x=Long,y=Lat,xend=LongEnd,yend=LatEnd),
+                                                                                                                                arrow=arrow(length=unit(0.2,'cm')),alpha=0.3)+labs(title='Saturday Routes')
+ggsave('Plot/SaturdayRoute.png')
