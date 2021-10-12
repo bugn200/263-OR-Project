@@ -1,3 +1,4 @@
+from re import I
 import numpy as np
 import pandas as pd
 from itertools import permutations
@@ -10,6 +11,7 @@ from pulp import *
 dfDemands = pd.read_csv('Data\WoolworthsDemands.csv', index_col=0)
 dfDurations = pd.read_csv('Data\WoolworthsTravelDurations.csv', index_col=0)
 dfLocations = pd.read_csv('Data\WoolworthsLocations.csv', index_col=0)
+
 
 dfDemandsWeekdays = dfDemands.copy()
 dfDemandsSaturdays = dfDemands.copy()
@@ -36,8 +38,6 @@ for store in dfDemandsWeekdays.index.values:
 
 countdownWeekdayMean = countdownWeekdayMean/countCountdown
 otherWeekdayMean = otherWeekdayMean/countOther
-
-
 
 for date in dfDemandsSaturdays.columns:
     if date not in SaturdayDates:
@@ -125,19 +125,19 @@ combCentral1 = list(permutations(Central, 1))
 # intialise array with all route permutations for each region
 combRegions = [combSouth4, combSouth3, combSouth2, combSouth1, combEast4, combEast3, combEast2, combEast1, combWest5, combWest4, combWest3, combWest1, combWest2, combNorth3, combNorth2, combNorth1, combCentral4, combCentral3, combCentral2, combCentral1]
 
-# remove route if total demand exceeds 24 crates (leaving 2 crates as leeway)
+# remove route if total demand exceeds 24 crates
 for region in combRegions:
     for i in range(len(region) - 1, -1, -1):
         demand = 0
         for store in region[i]:
             if 'Countdown' in store and 'Metro' not in store:
-                demand += countdownWeekdayMean
+                demand = demand + countdownWeekdayMean
             else:
-                demand += otherWeekdayMean
+                demand = demand + otherWeekdayMean
         if demand > 24:
             region.pop(i)
 
-# remove route if total duration exceeds 10000 seconds (leaving 4400 seconds as leeway)
+# remove route if total duration exceeds 10000 seconds
 for region in combRegions:
     for i in range(len(region) - 1, -1, -1):
         duration = len(region[0]) * 7.5 * 60 + dfDurations['Distribution Centre Auckland'][region[i][0]] + dfDurations['Distribution Centre Auckland'][region[i][-1]]
@@ -242,6 +242,37 @@ print("")
 print("")    
 print("")    
 
+#   Save Weekday routes coordinates too a csv
+######################################################################################################################################################################
+
+
+chosenRouteCoords = []
+for route in chosenRouteStores:
+    Route = []
+    for store in route:
+        for i in range(0, len(dfLocations)):
+            if dfLocations.iloc[i, 1] == store:
+                Route.append([dfLocations.iloc[i, 2], dfLocations.iloc[i, 3]])
+    chosenRouteCoords.append(Route)
+
+    
+
+dfRoutes = pd.DataFrame(chosenRouteCoords)
+
+dfRoutes.to_csv('data/WeekdayRoutes.csv')
+
+
+#   Save Weekday routes as a txt
+######################################################################################################################################################################
+
+
+textfile = open("data/WeekdayRouteStores.txt", "w")
+for element in chosenRouteStores:
+    for i in element:
+        textfile.write(i)
+    textfile.write("\n")
+textfile.close()
+
 
 # Get all possible feasible routes for saturday in each region using permutations and constraints
 ######################################################################################################################################################################
@@ -301,7 +332,7 @@ for region in combRegionsSaturday:
         demand = 0
         for store in region[i]:
             demand = demand + countdownSaturdayMean
-        if demand > 24:
+        if demand > 26:
             region.pop(i)
 
 # remove route if total duration exceeds 10000 seconds
@@ -310,7 +341,7 @@ for region in combRegionsSaturday:
         duration = len(region[0]) * 7.5 * 60 + dfDurations['Distribution Centre Auckland'][region[i][0]] + dfDurations['Distribution Centre Auckland'][region[i][-1]]
         for j in range(len(region[0]) - 2):
             duration = duration + dfDurations[region[i][j]][region[i][j + 1]]
-        if duration > 10000:
+        if duration > 14400:
             region.pop(i)
 
 
@@ -404,5 +435,37 @@ for i in chosenSaturday:
 # The optimised objective function (minimum cost for deliveries) printed to screen
 print("")    
 print("Minimised Cost for Saturday  =  $", round(value(probSaturday.objective), 2))
+
+
+#   Save Saturday routes coordinates as a csv
+######################################################################################################################################################################
+
+
+chosenRouteCoordsSaturday = []
+for route in chosenRouteStoresSaturday:
+    Route = []
+    for store in route:
+        for i in range(0, len(dfLocations)):
+            if dfLocations.iloc[i, 1] == store:
+                Route.append([dfLocations.iloc[i, 2], dfLocations.iloc[i, 3]])
+    chosenRouteCoordsSaturday.append(Route)
+
+    
+
+dfRoutes = pd.DataFrame(chosenRouteCoordsSaturday)
+
+dfRoutes.to_csv('data/SaturdayRoutes.csv')
+
+
+#   Save Saturday routes as a txt
+######################################################################################################################################################################
+
+
+textfile = open("data/SaturdayRouteStores.txt", "w")
+for element in chosenRouteStoresSaturday:
+    for i in element:
+        textfile.write(i)
+    textfile.write("\n")
+textfile.close()
 
 ######################################################################################################################################################################
