@@ -85,15 +85,20 @@ combCentral1 = list(permutations(Central, 1))
 combRegions = [combSouth4, combSouth3, combSouth2, combSouth1, combEast4, combEast3, combEast2, combEast1, combWest5, combWest4,
                combWest3, combWest1, combWest2, combNorth3, combNorth2, combNorth1, combCentral4, combCentral3, combCentral2, combCentral1]
 
+
+
 # remove route if total demand exceeds 24 crates
 for region in combRegions:
     for i in range(len(region) - 1, -1, -1):
         demand = 0
         for store in region[i]:
+            demand = demand +  (sum(dfDemands.loc[store]) / len(dfDemands.loc[store]))
+            '''
             if 'Countdown' in store and 'Metro' not in store:
                 demand = demand + 7.5
             else:
                 demand = demand + 4.5
+            '''
         if demand > 26:
             region.pop(i)
 
@@ -213,7 +218,6 @@ print("")
 #   Save Weekday routes coordinates too a csv
 ######################################################################################################################################################################
 
-
 chosenRouteCoords = []
 for route in chosenRouteStores:
     Route = []
@@ -228,10 +232,8 @@ dfRoutes = pd.DataFrame(chosenRouteCoords)
 
 dfRoutes.to_csv('data/WeekdayRoutes.csv')
 
-
 #   Save Weekday routes as a txt
 ######################################################################################################################################################################
-
 
 textfile = open("data/WeekdayRouteStores.txt", "w")
 for element in chosenRouteStores:
@@ -240,6 +242,10 @@ for element in chosenRouteStores:
         textfile.write(',')
     textfile.write("\n")
 textfile.close()
+
+#   Generate 1000 possible combinations of demand and route costs.
+######################################################################################################################################################################
+
 
 
 # Get all possible feasible routes for saturday in each region using permutations and constraints
@@ -419,7 +425,6 @@ print("Minimised Cost for Saturday  =  $",
 #   Save Saturday routes coordinates as a csv
 ######################################################################################################################################################################
 
-
 chosenRouteCoordsSaturday = []
 for route in chosenRouteStoresSaturday:
     Route = []
@@ -437,7 +442,6 @@ dfRoutes.to_csv('data/SaturdayRoutes.csv')
 #   Save Saturday routes as a txt
 ######################################################################################################################################################################
 
-
 textfile = open("data/SaturdayRouteStores.txt", "w")
 for element in chosenRouteStoresSaturday:
     for i in element:
@@ -445,6 +449,5 @@ for element in chosenRouteStoresSaturday:
         textfile.write(',')
     textfile.write("\n")
 textfile.close()
-
 
 ######################################################################################################################################################################
