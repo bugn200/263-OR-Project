@@ -10,7 +10,7 @@ regionalRoute=function (regional_raster,regional_trips,regional_sat_trips,region
   base_sat=tm_shape(regional_raster)+
     tm_rgb()+tm_shape(Sat_stores)+
     tm_dots(size=0.3,col='Type',palette='Dark2')+
-    tm_layout(legend.outside=TRUE,legend.outside.size = 1)
+    tm_layout(legend.outside=TRUE)
   #Get the route to each store in each route of the region, including the route back
   for(i in 1:nrow(regional_trips)) {
     #Split the route into set of Strings
@@ -54,6 +54,6 @@ regionalRoute=function (regional_raster,regional_trips,regional_sat_trips,region
       base_sat=base_sat+tm_shape(triplines_sat)+tm_lines(col='blue')
     }
   }
-  region_map=tmap_arrange(base,base_sat)
+  region_map=tmap_arrange(base,base_sat,ncol = 2)
   return (region_map)
 }

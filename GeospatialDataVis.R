@@ -6,6 +6,7 @@ library(mapedit)
 library(OpenStreetMap)
 library(raster)
 library(rgdal)
+library(osrm)
 #Read Supermarket location data from the csv
 supermarket_raw=read.csv('data/WoolworthsRegion.csv')
 #Convert Longitude and Latitude to be a geometry, using EPSG 4326 system
@@ -36,15 +37,15 @@ data_vis_sat=tm_shape(akl_shape)+tm_polygons()+tm_shape(saturday)+tm_dots(col='T
 tmap_save(data_vis_sat,'Plot/Saturday.png')
 
 #Get the coordinate of supermarket in each region and the extent coordinates
-South=filter(supermarket,Region%in%c('South','Distribution Centre Auckland'))
+South=filter(supermarket1,Region%in%c('South','Distribution Centre Auckland'))
 South_shape=st_crop(akl_shape,xmin=1758000,xmax=1777000,ymin=5895000,ymax=5913000)
 North=filter(supermarket1,Region%in%c('North','Distribution Centre Auckland'))
-North_shape=st_crop(akl_shape,xmin=1751000,xmax=1764000,ymin=5908000,ymax=5936000)
-Central=filter(supermarket,Region%in%c('Central','Distribution Centre Auckland'))
-Central_shape=st_crop(akl_shape,xmin=1750000,xmax=1762500,ymin=5907800,ymax=5922000)
-East=filter(supermarket,Region%in%c('East','Distribution Centre Auckland'))
-East_shape=st_crop(akl_shape,xmin=1759000,xmax=1773000,ymin=5908000,ymax=5918500)
-West=filter(supermarket,Region%in%c('West','Distribution Centre Auckland'))
+North_shape=st_crop(akl_shape,xmin=1751000,xmax=1766000,ymin=5908000,ymax=5936000)
+Central=filter(supermarket1,Region%in%c('Central','Distribution Centre Auckland'))
+Central_shape=st_crop(akl_shape,xmin=1750000,xmax=1765000,ymin=5907800,ymax=5922000)
+East=filter(supermarket1,Region%in%c('East','Distribution Centre Auckland'))
+East_shape=st_crop(akl_shape,xmin=1759000,xmax=1773000,ymin=5906800,ymax=5918500)
+West=filter(supermarket1,Region%in%c('West','Distribution Centre Auckland'))
 West_shape=st_crop(akl_shape,xmin=1741100,xmax=1762000,ymin=5908000,ymax=5928000)
 
 
@@ -133,17 +134,32 @@ for(i in 1:nrow(w)) {
   route=str_split(w[i,1],',')
   w[i,2]=filter(supermarket,Store==route[[1]][1])$Region
 }
+#Do the same thing for Saturday routes
+s=as.data.frame(saturdayRoute)
+colnames(s)='Route'
+s$Region='Unknown'
+for(i in 1:nrow(s)) {
+  #split the string for the route
+  route=str_split(s[i,1],',')
+  s[i,2]=filter(supermarket,Store==route[[1]][1])$Region
+}
+
 #Put each route region into a new data frame
 North_route=filter(w,Region=='North')
 South_route=filter(w,Region=='South')
 East_route=filter(w,Region=='East')
 West_route=filter(w,Region=='West')
 Central_route=filter(w,Region=='Central')
+North_sat_route=filter(s,Region=='North')
+South_sat_route=filter(s,Region=='South')
+East_sat_route=filter(s,Region=='East')
+West_sat_route=filter(s,Region=='West')
+Central_sat_route=filter(s,Region=='Central')
 #Save the North shape as a raster for reusability
 akl_North=openmap(as.numeric(st_bbox(North_shape))[c(4,1)],as.numeric(st_bbox(North_shape))[c(2,3)],type='osm')
 akl_North=openproj(akl_North)
 North_raster=raster(akl_North)
-North_raster=writeRaster(North_raster,'Shape_files/North.tif',format='GTiff')
+North_raster=writeRaster(North_raster,'Shape_files/North.tif',format='GTiff',overwrite=TRUE)
 #If the file is available in Shape_files, run this command only
 North_raster=raster('Shape_files/North.tif')
 #Plot the map of the Northern region and the supermarkets
@@ -177,7 +193,7 @@ West_raster=writeRaster(West_raster,'Shape_files/West.tif',format='GTiff')
 #If the file is saved in Shape_files,run this command only
 West_raster=raster('Shape_files/West.tif')
 #Plot the map of the Southern region and the supermarkets
-tm_shape(West_raster)+tm_rgb()+tm_shape(West)+tm_dots(col='Type',palette='Dark2',size=0.3)
+a2=tm_shape(West_raster)+tm_rgb()+tm_shape(West)+tm_dots(col='Type',palette='Dark2',size=0.3)
 
 #Save the Central shape as a raster for reusability
 akl_Central=openmap(as.numeric(st_bbox(Central_shape))[c(4,1)],as.numeric(st_bbox(Central_shape))[c(2,3)],type='osm')
@@ -187,4 +203,16 @@ Central_raster=writeRaster(Central_raster,'Shape_files/Central.tif',format='GTif
 #If the file is saved in Shape_files,run this command only
 Central_raster=raster('Shape_files/Central.tif')
 #Plot the map of the Southern region and the supermarkets
-tm_shape(Central_raster)+tm_rgb()+tm_shape(Central)+tm_dots(col='Type',palette='Dark2',size=0.3)
+a1=tm_shape(Central_raster)+tm_rgb()+tm_shape(Central)+tm_dots(col='Type',palette='Dark2',size=0.3)
+
+source('regionalRoute.R')
+North_map=regionalRoute(regional_raster= North_raster,regional_trips = North_route,regional_sat_trips = North_sat_route,region_stores = North)
+tmap_save(North_map,'Plot/North_routes.png',width = 2100,height=1200)
+South_map=regionalRoute(regional_raster= South_raster,regional_trips = South_route,regional_sat_trips = South_sat_route,region_stores = South)
+tmap_save(South_map,'Plot/South_routes.png',width = 2500,height=900)
+East_map=regionalRoute(regional_raster= East_raster,regional_trips = East_route,regional_sat_trips = East_sat_route,region_stores = East)
+tmap_save(East_map,'Plot/East_routes.png',width = 2500,height=850)
+West_map=regionalRoute(regional_raster= West_raster,regional_trips = West_route,regional_sat_trips = West_sat_route,region_stores = West)
+tmap_save(East_map,'Plot/West_routes.png',width = 2500,height=850)
+Central_map=regionalRoute(regional_raster= Central_raster,regional_trips = Central_route,regional_sat_trips = Central_sat_route,region_stores = Central)
+tmap_save(Central_map,'Plot/Central_routes.png',width = 2500,height=900)
