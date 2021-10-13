@@ -6,8 +6,8 @@ import scipy.stats as stats
 import math
 
 
-dfDemandsWeekdays = pd.read_csv('Data\DemandsWeekdays.csv', index_col=0)
-dfDemandsSaturdays = pd.read_csv('Data\DemandsSaturdays.csv', index_col=0)
+dfDemandsWeekdays = pd.read_csv('data\DemandsWeekdays.csv', index_col=0)
+dfDemandsSaturdays = pd.read_csv('data\DemandsSaturdays.csv', index_col=0)
 
 store_type = []
 for store in dfDemandsWeekdays.index.values:
