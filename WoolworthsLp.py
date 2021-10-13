@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import scipy.stats as stats
 from matplotlib.ticker import MaxNLocator
 from scipy.stats import truncnorm
+import statsmodels.stats.weightstats as sms
 
 
 # Read in data and format into regions for weedays and weekends
@@ -537,7 +538,7 @@ fig, ax1 = plt.subplots(1)
 weekendDemandsSampledCountdown = dfDemandsWeekdays_pivotLonger[dfDemandsWeekdays_pivotLonger.Store_type == 'Countdown'].Demand_Value.sample(n=100000, replace=True)
 ax1.hist(weekendDemandsSampledCountdown, bins=13, range=(2.5, 15.5), edgecolor='black', linewidth=1.2, density=True)
 ax1.xaxis.set_major_locator(MaxNLocator(integer=True))
-plt.title("Daily Demand Distribtion for Countdown Stores on Weekdays")
+plt.title("Daily Demand Distribution for Countdown Stores on Weekdays")
 plt.xlabel("Daily Demand (no. pallets)")
 plt.ylabel("Probability")
 plt.show()
@@ -547,7 +548,7 @@ fig, ax2 = plt.subplots(1)
 weekendDemandsSampledOther = dfDemandsWeekdays_pivotLonger[dfDemandsWeekdays_pivotLonger.Store_type == 'Other'].Demand_Value.sample(n=100000, replace=True)
 ax2.hist(weekendDemandsSampledOther, bins=8, range=(1.5, 9.5), edgecolor='black', linewidth=1.2, density=True)
 ax2.xaxis.set_major_locator(MaxNLocator(integer=True))
-plt.title("Daily Demand Distribtion for 'Other' Stores on Weekdays")
+plt.title("Daily Demand Distribution for 'Other' Stores on Weekdays")
 plt.xlabel("Daily Demand (no. pallets)")
 plt.ylabel("Probability")
 plt.show()
@@ -557,7 +558,7 @@ fig, ax3 = plt.subplots(1)
 saturdayDemandsSampled = dfDemandsSaturdays_pivotLonger[dfDemandsSaturdays_pivotLonger.Store_type == 'Countdown'].Demand_Value.sample(n=100000, replace=True)
 ax3.hist(saturdayDemandsSampled, bins=5, range=(1.5, 6.5), edgecolor='black', linewidth=1.2, density=True)
 ax3.xaxis.set_major_locator(MaxNLocator(integer=True))
-plt.title("Daily Demand Distribtion for Countdown Stores on Saturday")
+plt.title("Daily Demand Distribution for Countdown Stores on Saturday")
 plt.xlabel("Daily Demand (no. pallets)")
 plt.ylabel("Probability")
 plt.show()
@@ -699,3 +700,9 @@ ax2.set_title("Daily Cost Distribution for Saturdays")
 ax2.set_xlabel("Daily Cost ($)")
 ax2.set_ylabel("Probability")
 plt.show()
+
+print("")
+print("")
+print("Confidence interval for weekdays is ", sms.DescrStatsW(costWeekdayArray).tconfint_mean(alpha=0.05))
+print("")
+print("Confidence interval for weekdays is ", sms.DescrStatsW(costSaturdayArray).tconfint_mean(alpha=0.05))
