@@ -172,8 +172,7 @@ South_raster=raster(akl_South)
 South_raster=writeRaster(South_raster,'Shape_files/South.tif',format='GTiff')
 #If the file is available in Shape_files,run this command only
 South_raster=raster('Shape_files/South.tif')
-#Plot the map of the Southern region and the supermarkets
-tm_shape(South_raster)+tm_rgb()+tm_shape(South)+tm_dots(col='Type',palette='Dark2',size=0.3)
+
 
 #Save the East shape as a raster for reusability
 akl_East=openmap(as.numeric(st_bbox(East_shape))[c(4,1)],as.numeric(st_bbox(East_shape))[c(2,3)],type='osm')
@@ -182,8 +181,6 @@ East_raster=raster(akl_East)
 East_raster=writeRaster(East_raster,'Shape_files/East.tif',format='GTiff')
 #If the file is available in Shape_files,run this command only
 East_raster=raster('Shape_files/East.tif')
-#Plot the map of the Southern region and the supermarkets
-tm_shape(East_raster)+tm_rgb()+tm_shape(East)+tm_dots(col='Type',palette='Dark2',size=0.3)
 
 #Save the West shape as a raster for reusability
 akl_West=openmap(as.numeric(st_bbox(West_shape))[c(4,1)],as.numeric(st_bbox(West_shape))[c(2,3)],type='osm')
@@ -192,8 +189,7 @@ West_raster=raster(akl_West)
 West_raster=writeRaster(West_raster,'Shape_files/West.tif',format='GTiff')
 #If the file is saved in Shape_files,run this command only
 West_raster=raster('Shape_files/West.tif')
-#Plot the map of the Southern region and the supermarkets
-a2=tm_shape(West_raster)+tm_rgb()+tm_shape(West)+tm_dots(col='Type',palette='Dark2',size=0.3)
+
 
 #Save the Central shape as a raster for reusability
 akl_Central=openmap(as.numeric(st_bbox(Central_shape))[c(4,1)],as.numeric(st_bbox(Central_shape))[c(2,3)],type='osm')
@@ -202,8 +198,6 @@ Central_raster=raster(akl_Central)
 Central_raster=writeRaster(Central_raster,'Shape_files/Central.tif',format='GTiff')
 #If the file is saved in Shape_files,run this command only
 Central_raster=raster('Shape_files/Central.tif')
-#Plot the map of the Southern region and the supermarkets
-a1=tm_shape(Central_raster)+tm_rgb()+tm_shape(Central)+tm_dots(col='Type',palette='Dark2',size=0.3)
 
 source('regionalRoute.R')
 North_map=regionalRoute(regional_raster= North_raster,regional_trips = North_route,regional_sat_trips = North_sat_route,region_stores = North)
@@ -213,6 +207,6 @@ tmap_save(South_map,'Plot/South_routes.png',width = 2500,height=900)
 East_map=regionalRoute(regional_raster= East_raster,regional_trips = East_route,regional_sat_trips = East_sat_route,region_stores = East)
 tmap_save(East_map,'Plot/East_routes.png',width = 2500,height=850)
 West_map=regionalRoute(regional_raster= West_raster,regional_trips = West_route,regional_sat_trips = West_sat_route,region_stores = West)
-tmap_save(East_map,'Plot/West_routes.png',width = 2500,height=850)
+tmap_save(West_map,'Plot/West_routes.png',width = 2500,height=850)
 Central_map=regionalRoute(regional_raster= Central_raster,regional_trips = Central_route,regional_sat_trips = Central_sat_route,region_stores = Central)
 tmap_save(Central_map,'Plot/Central_routes.png',width = 2500,height=900)
