@@ -473,12 +473,15 @@ for element in chosenRouteStoresSaturday:
     textfile.write("\n")
 textfile.close()
 
+
 # Simulation
 ######################################################################################################################################################################
 
+# read in files
 dfDemandsWeekdays = pd.read_csv('data\DemandsWeekdays.csv', index_col=0)
 dfDemandsSaturdays = pd.read_csv('data\DemandsSaturdays.csv', index_col=0)
 
+# create attribute based on whether a store is a Countdown store or not
 store_type = []
 for store in dfDemandsWeekdays.index.values:
     if 'Countdown' in store and 'Metro' not in store:
@@ -486,91 +489,213 @@ for store in dfDemandsWeekdays.index.values:
     else:
         store_type.append('Other')
         
-
+# add attributes to dataframes
 dfDemandsWeekdays['Store_type'] = store_type
 dfDemandsSaturdays['Store_type'] = store_type
 
+# drop all stores that aren't Countdown on Saturdays (since demand is 0)
 for store in dfDemandsSaturdays.index.values:
     if 'Countdown' in store and 'Metro' not in store:
         continue
     else:
         dfDemandsSaturdays = dfDemandsSaturdays.drop(store, axis=0)
 
+# pivot the weekday data
 dfDemandsWeekdays_pivotLonger = pd.melt(dfDemandsWeekdays, id_vars=['Store_type'],  value_vars=['2021-06-14', '2021-06-15', '2021-06-16', '2021-06-17', '2021-06-18', '2021-06-21', 
                                                                 '2021-06-22', '2021-06-23', '2021-06-24', '2021-06-25', '2021-06-28', '2021-06-29', 
                                                                 '2021-06-30', '2021-07-01', '2021-07-02', '2021-07-05', '2021-07-06', '2021-07-07', 
                                                                 '2021-07-08', '2021-07-09'], var_name='Date', value_name='Demand_Value')
 dfDemandsWeekdays_pivotLonger.to_csv('data/dfDemandsWeekdays_pivotLonger.csv')
 
+# pivot the saturday data
 dfDemandsSaturdays_pivotLonger = pd.melt(dfDemandsSaturdays, id_vars=['Store_type'], value_vars=['2021-06-19', '2021-06-26', '2021-07-03', '2021-07-10'], var_name='Date', value_name='Demand_Value')
 dfDemandsSaturdays_pivotLonger.to_csv('data/dfDemandsSaturdays_pivotLonger.csv')
 
+# plot weekday demand distribution based on whether store type is countdown or other
 plotWeekday = (ggplot(dfDemandsWeekdays_pivotLonger,  aes(x='Demand_Value')) + geom_bar(stat='count', fill="cornflowerblue") + facet_wrap('Store_type', scales = 'free') + 
     ggtitle("Plot of Weekday Demand Distribution for \n Countdown Stores and Other Stores") + xlab("Demand (no. pallets)") + ylab("Frequency"))
 print(plotWeekday)
 
+# plot saturday demand distribution
 plotSaturday = (ggplot(dfDemandsSaturdays_pivotLonger,  aes(x='Demand_Value')) + geom_bar(stat='count', fill="cornflowerblue") + 
     ggtitle("Plot of Saturday Demand Distribution \n for Countdown Stores") + xlab("Demand (no. pallets)") + ylab("Frequency"))
 print(plotSaturday)
 
+# create and plot normal distribution for traffic delays
 mu = 40
 variance = 10
 sigma = math.sqrt(variance)
 delay = np.linspace(mu - 4*sigma, mu + 4*sigma, 10000)
 plt.plot(delay, stats.norm.pdf(delay, mu, sigma))
+plt.title("Normal Distribution to Model Delays due to Traffic")
+plt.xlabel("Time (minutes)")
+plt.ylabel("Probability")
 plt.show()
 
-
-fig, (ax1, ax2, ax3) = plt.subplots(3)
+# sample from weekday demand distribution for countdown stores and plot
+fig, ax1 = plt.subplots(1)
 weekendDemandsSampledCountdown = dfDemandsWeekdays_pivotLonger[dfDemandsWeekdays_pivotLonger.Store_type == 'Countdown'].Demand_Value.sample(n=100000, replace=True)
-ax1.hist(weekendDemandsSampledCountdown, bins=13, range=(2.5, 15.5), edgecolor='black', linewidth=1.2)
+ax1.hist(weekendDemandsSampledCountdown, bins=13, range=(2.5, 15.5), edgecolor='black', linewidth=1.2, density=True)
 ax1.xaxis.set_major_locator(MaxNLocator(integer=True))
-weekendDemandsSampledOther = dfDemandsWeekdays_pivotLonger[dfDemandsWeekdays_pivotLonger.Store_type == 'Other'].Demand_Value.sample(n=100000, replace=True)
-ax2.hist(weekendDemandsSampledOther, bins=8, range=(1.5, 9.5), edgecolor='black', linewidth=1.2)
-ax2.xaxis.set_major_locator(MaxNLocator(integer=True))
-saturdayDemandsSampled = dfDemandsSaturdays_pivotLonger[dfDemandsSaturdays_pivotLonger.Store_type == 'Countdown'].Demand_Value.sample(n=100000, replace=True)
-ax3.hist(saturdayDemandsSampled, bins=5, range=(1.5, 6.5), edgecolor='black', linewidth=1.2)
-ax3.xaxis.set_major_locator(MaxNLocator(integer=True))
+plt.title("Daily Demand Distribtion for Countdown Stores on Weekdays")
+plt.xlabel("Daily Demand (no. pallets)")
+plt.ylabel("Probability")
 plt.show()
 
+# sample from weekday demand distribution for other stores  =and plot
+fig, ax2 = plt.subplots(1)
+weekendDemandsSampledOther = dfDemandsWeekdays_pivotLonger[dfDemandsWeekdays_pivotLonger.Store_type == 'Other'].Demand_Value.sample(n=100000, replace=True)
+ax2.hist(weekendDemandsSampledOther, bins=8, range=(1.5, 9.5), edgecolor='black', linewidth=1.2, density=True)
+ax2.xaxis.set_major_locator(MaxNLocator(integer=True))
+plt.title("Daily Demand Distribtion for 'Other' Stores on Weekdays")
+plt.xlabel("Daily Demand (no. pallets)")
+plt.ylabel("Probability")
+plt.show()
+
+# sample from saturday demand distribution and plot
+fig, ax3 = plt.subplots(1)
+saturdayDemandsSampled = dfDemandsSaturdays_pivotLonger[dfDemandsSaturdays_pivotLonger.Store_type == 'Countdown'].Demand_Value.sample(n=100000, replace=True)
+ax3.hist(saturdayDemandsSampled, bins=5, range=(1.5, 6.5), edgecolor='black', linewidth=1.2, density=True)
+ax3.xaxis.set_major_locator(MaxNLocator(integer=True))
+plt.title("Daily Demand Distribtion for Countdown Stores on Saturday")
+plt.xlabel("Daily Demand (no. pallets)")
+plt.ylabel("Probability")
+plt.show()
+
+# define a function to simplify truncnorm function
 def get_truncated_normal(mean=0, sd=1, low=0, upp=10):
     return truncnorm(
         (low - mean) / sd, (upp - mean) / sd, loc=mean, scale=sd)
 
+# create truncated normal distribution for traffic delays       
 traffic = get_truncated_normal(mu, sigma, low=15, upp=65)
 
+# sample from truncated traffic delay distribution and plot
 trafficSampled = traffic.rvs(10000)
-
 fig, ax4 = plt.subplots(1)
-ax4.hist(trafficSampled, edgecolor='black', linewidth=1.2)
+ax4.hist(trafficSampled, edgecolor='black', linewidth=1.2, density=True)
+plt.title("Histogram Sampled from Traffic Normal Distribution")
+plt.xlabel("Time (minutes)")
+plt.ylabel("Probability")
 plt.show()
 
-
+# initialise simulation array for daily weekday cost
 costWeekdayArray = [] 
 
+# get number of routes on each weekday
 file = open("data\WeekdayRouteStores.txt", "r")
-line_count = 0
+line_count_weekday = 0
 for line in file:
     if line != "\n":
-        line_count += 1
+        line_count_weekday += 1
 file.close()
 
+# run the monte carlo simulation 1000 times for weedays
 for i in range(1000):
-    costWeekday = 6226.73
+    # initialise variables
+    costWeekday = 6226.73  # initial cost without sampling considerations
     extraTrucks = 0
     time = 0
+    # looping through routes
     for route in chosenRouteStores:
+        # intialise array for demand at each store in the route
+        demand = []
+        # add the duration of each route to the time
         for routeCost in lpMat:
             if route == routeCost[1]:
                 time += routeCost[2]*3600/225
-    for i in range(line_count + extraTrucks):
-        randDelay = traffic.rvs()
-        costWeekday += randDelay*60*225/3600
-        time += randDelay*60
+        # looping through each store in the route
+        for store in route:
+            # sampling from demand distributions based on the store type
+            if 'Countdown' in store and 'Metro' not in store:
+                demand.append(dfDemandsWeekdays_pivotLonger[dfDemandsWeekdays_pivotLonger.Store_type == 'Countdown'].Demand_Value.sample(n=1, replace=True))
+            else:
+                demand.append(dfDemandsWeekdays_pivotLonger[dfDemandsWeekdays_pivotLonger.Store_type == 'Other'].Demand_Value.sample(n=1, replace=True))
+        # turn tuple into list so it is mutable
+        route = list(route)
+        # if demand is exceeded then remove the first store from the route
+        while np.sum(demand) > 26:
+            demand.pop(0)
+            storeRemoved = route.pop(0)
+            extraTrucks += 1
+            # change routes and thus overall time
+            time = time - dfDurations[storeRemoved][route[0]] + dfDurations['Distribution Centre Auckland'][route[0]]  + dfDurations[storeRemoved]['Distribution Centre Auckland']
+    # if all trucks are used up then use wetlease trucks
+    if extraTrucks > (60 - line_count_weekday):
+        # get random delay for each route and add it to the time and cost
+        for i in range(60):
+            # getting a random delay from the truncated normal traffic distribution
+            randDelay = traffic.rvs()
+            costWeekday += randDelay*60*225/3600
+            time += randDelay*60
+            # wet lease trucks
+            costWeekday += (extraTrucks - 60)*2000
+    else:
+        # get random delay for each route and add it to the time and cost
+        for i in range(line_count_weekday + extraTrucks):
+            randDelay = traffic.rvs()
+            costWeekday += randDelay*60*225/3600
+            time += randDelay*60
+    # if four hours exceeded for route then add overtime
     if time > 14400:
         costWeekday += (time - 14400)*50/3600
+    # append final cost to the cost array
     costWeekdayArray.append(costWeekday)
 
-fig, ax5 = plt.subplots(1)
-ax5.hist(costWeekdayArray, edgecolor='black', linewidth=1.2)
+
+# initialise simulation array for saturday cost
+costSaturdayArray = [] 
+
+# get number of routes on saturday
+file = open("data\SaturdayRouteStores.txt", "r")
+line_count_saturday = 0
+for line in file:
+    if line != "\n":
+        line_count_saturday += 1
+file.close()
+
+# run the monte carlo simulation 1000 times on saturdays
+# rest of code is same as above simulation
+for i in range(1000):
+    costSaturday = 4547.94 
+    extraTrucks = 0
+    time = 0
+    for route in chosenRouteStoresSaturday:
+        demand = []
+        for routeCost in lpMatSaturday:
+            if route == routeCost[1]:
+                time += routeCost[2]*3600/225
+        for store in route:
+            dfDemandsSaturdays_pivotLonger[dfDemandsSaturdays_pivotLonger.Store_type == 'Countdown'].Demand_Value.sample(n=1, replace=True)
+        route = list(route)
+        while np.sum(demand) > 26:
+            demand.pop(0)
+            storeRemoved = route.pop(0)
+            extraTrucks += 1
+            time = time - dfDurations[storeRemoved][route[0]] + dfDurations['Distribution Centre Auckland'][route[0]]  + dfDurations[storeRemoved]['Distribution Centre Auckland']
+    if extraTrucks > (60 - line_count_saturday):
+        for i in range(60):
+            randDelay = traffic.rvs()
+            costSaturday += randDelay*60*225/3600
+            time += randDelay*60
+            costSaturday += (extraTrucks - 60)*2000
+    else:
+        for i in range(line_count_saturday + extraTrucks):
+            randDelay = traffic.rvs()
+            costSaturday += randDelay*60*225/3600
+            time += randDelay*60
+    if time > 14400:
+        costSaturday += (time - 14400)*50/3600
+    costSaturdayArray.append(costSaturday)
+
+# plot the cost distributions for weekdays and saturdays
+fig, (ax1, ax2) = plt.subplots(1, 2)
+ax1.hist(costWeekdayArray, edgecolor='black', linewidth=1.2, density=True)
+ax2.hist(costSaturdayArray, edgecolor='black', linewidth=1.2, density=True)
+ax1.set_title("Daily Cost Distribution for Weekdays")
+ax1.set_xlabel("Daily Cost ($)")
+ax1.set_ylabel("Probability")
+ax2.set_title("Daily Cost Distribution for Saturdays")
+ax2.set_xlabel("Daily Cost ($)")
+ax2.set_ylabel("Probability")
 plt.show()
