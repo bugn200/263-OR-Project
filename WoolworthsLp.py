@@ -334,13 +334,13 @@ combCentralSaturday1 = list(permutations(CentralSaturday, 1))
 # intialise array with all route permutations for each region
 combRegionsSaturday = [combSouthSaturday5, combSouthSaturday4, combSouthSaturday3, combSouthSaturday2, combSouthSaturday1, combEastSaturday5, combEastSaturday4, combEastSaturday3, combEastSaturday2, combEastSaturday1, combWestSaturday5, combWestSaturday4, combWestSaturday3, combWestSaturday1, combWestSaturday2, combNorthSaturday4, combNorthSaturday3, combNorthSaturday2, combNorthSaturday1, combCentralSaturday5, combCentralSaturday4, combCentralSaturday3, combCentralSaturday2, combCentralSaturday1]
 
-# remove route if total demand exceeds 24 crates
+# remove route if total demand exceeds 26 crates
 for region in combRegionsSaturday:
     for i in range(len(region) - 1, -1, -1):
         demand = 0
         for store in region[i]:
             demand = demand + countdownSaturdayMean
-        if demand > 26:
+        if demand > 24:
             region.pop(i)
 
 # remove route if total duration exceeds 10000 seconds
