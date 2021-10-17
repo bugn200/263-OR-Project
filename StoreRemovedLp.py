@@ -18,7 +18,7 @@ import statsmodels.stats.weightstats as sms
 # read in data as pandas dataframes
 dfDemands = pd.read_csv('data\WoolworthsDemands.csv', index_col=0)
 dfDurations = pd.read_csv('data\WoolworthsTravelDurations.csv', index_col=0)
-dfLocations = pd.read_csv('data\WoolworthsLocations.csv', index_col=0)
+dfLocations = pd.read_csv('data\WoolworthsLocations.csv', index_col=1)
 dfDistances = pd.read_csv('data\WoolworthsDistances.csv', index_col=0)
 
 dfDemandsWeekdays = dfDemands.copy()
@@ -38,14 +38,15 @@ for i in dfDistances:
 
 print('The two closest stores are ' + I + ' and '+  dfDistances.iloc[J].name + ', we will consider dropping ' + dfDistances.iloc[J].name)
 removed_store = dfDemandsWeekdays.iloc[J].name
-dfDemandsWeekdays=dfDemandsWeekdays.drop(dfDemandsWeekdays.iloc[J].name, axis=0)
-dfLocations = dfLocations.drop(dfLocations.iloc[J].name, axis=0)
+dfDemandsWeekdays=dfDemandsWeekdays.drop(removed_store, axis=0)
+dfLocations = dfLocations.drop(removed_store[10:], axis=0)
+dfDurations = dfDurations.drop(removed_store, axis=0)
+dfDurations = dfDurations.drop(removed_store, axis=1)
 
 
 for date in WeekendDates:   
     dfDemandsWeekdays.pop(date)
 dfDemandsWeekdays['Mean'] = dfDemandsWeekdays.mean(axis=1)
-
 
 
 # write to csv
