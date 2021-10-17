@@ -19,6 +19,7 @@ import statsmodels.stats.weightstats as sms
 dfDemands = pd.read_csv('data\WoolworthsDemands.csv', index_col=0)
 dfDurations = pd.read_csv('data\WoolworthsTravelDurations.csv', index_col=0)
 dfLocations = pd.read_csv('data\WoolworthsLocations.csv', index_col=0)
+dfDistances = pd.read_csv('data\WoolworthsDistances.csv', index_col=0)
 
 dfDemandsWeekdays = dfDemands.copy()
 dfDemandsSaturdays = dfDemands.copy()
@@ -706,3 +707,4 @@ print("")
 print("Confidence interval for weekdays is ", sms.DescrStatsW(costWeekdayArray).tconfint_mean(alpha=0.05))
 print("")
 print("Confidence interval for weekdays is ", sms.DescrStatsW(costSaturdayArray).tconfint_mean(alpha=0.05))
+
