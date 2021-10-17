@@ -1,19 +1,29 @@
-from re import I
 import numpy as np
 import pandas as pd
 from itertools import permutations
 from pulp import *
 import math
-from plotnine import aes, ggplot, geom_bar, facet_wrap, ggtitle, xlab, ylab, geom_histogram
+from plotnine import aes, ggplot, geom_bar, facet_wrap, ggtitle, xlab, ylab
 import matplotlib.pyplot as plt
 import scipy.stats as stats
 from matplotlib.ticker import MaxNLocator
 from scipy.stats import truncnorm
 import statsmodels.stats.weightstats as sms
+import warnings
+warnings.filterwarnings('ignore')
+
+
+# initialise constants
+numTrucks = 60
+hourlyTruckCost = 225
+overtimeTruckCost = 275
+truckCapacity = 26
+unloadTime = 7.5
+wetleaseCost = 2000
 
 
 # Read in data and format into regions for weedays and weekends
-######################################################################################################################################################################
+#############################################################################################################################################################################################################
 
 # read in data as pandas dataframes
 dfDemands = pd.read_csv('data\WoolworthsDemands.csv', index_col=0)
@@ -39,15 +49,18 @@ for i in dfDistances:
 print('The two closest stores are ' + I + ' and '+  dfDistances.iloc[J].name + ', we will consider dropping ' + dfDistances.iloc[J].name)
 removed_store = dfDemandsWeekdays.iloc[J].name
 dfDemandsWeekdays=dfDemandsWeekdays.drop(removed_store, axis=0)
+dfDemandsSaturdays=dfDemandsSaturdays.drop(removed_store, axis=0)
 dfLocations = dfLocations.drop(removed_store[10:], axis=0)
 dfDurations = dfDurations.drop(removed_store, axis=0)
 dfDurations = dfDurations.drop(removed_store, axis=1)
 
+for i in range(len(dfDemandsWeekdays.columns)):
+    dfDemandsWeekdays.loc[I][i] = dfDemandsWeekdays.loc[I][i]*1.5
+    dfDemandsSaturdays.loc[I][i] = dfDemandsSaturdays.loc[I][i]*1.5
 
 for date in WeekendDates:   
     dfDemandsWeekdays.pop(date)
 dfDemandsWeekdays['Mean'] = dfDemandsWeekdays.mean(axis=1)
-
 
 # write to csv
 dfDemandsWeekdays.to_csv('data\SRDemandsWeekdays.csv')
@@ -67,6 +80,24 @@ for store in dfDemandsWeekdays.index.values:
 
 countdownWeekdayMean = countdownWeekdayMean/countCountdown
 otherWeekdayMean = otherWeekdayMean/countOther
+
+for date in dfDemandsSaturdays.columns:
+    if date not in SaturdayDates:
+        dfDemandsSaturdays.pop(date)
+dfDemandsSaturdays['Mean'] = dfDemandsSaturdays.mean(axis=1)
+
+# write to csv
+dfDemandsSaturdays.to_csv('data\SRDemandsSaturdays.csv')
+
+countdownSaturdayMean = 0
+
+countCountdown = 0
+for store in dfDemandsWeekdays.index.values:
+    if 'Countdown' in store and 'Metro' not in store:
+        countCountdown += 1
+        countdownSaturdayMean += dfDemandsSaturdays.loc[store]['Mean']
+
+countdownSaturdayMean = countdownSaturdayMean/countCountdown
 
 
 # initialise region array
@@ -113,7 +144,7 @@ for index, row in dfRegions.iterrows():
 
 
 # Get all possible feasible routes for the weekdays in each region using permutations and constraints
-######################################################################################################################################################################
+#############################################################################################################################################################################################################
 
 # get route permutations of stores in each region
 combSouth4 = list(permutations(South, 4))
@@ -205,7 +236,7 @@ lpMat = list(zip(lpMatIndex, lpMatRoutes, lpMatCosts))
 
 
 # Create and solve the weekday lp
-######################################################################################################################################################################
+#############################################################################################################################################################################################################
 
 probWeekday =  LpProblem("SRWoolworthsLpWeekday", LpMinimize)
 
@@ -258,7 +289,7 @@ print("")
 
 
 # Save Weekday routes coordinates to a csv file
-######################################################################################################################################################################
+#############################################################################################################################################################################################################
 
 chosenRouteCoords = []
 for route in chosenRouteStores:
@@ -275,7 +306,7 @@ dfRoutes.to_csv('data/SRWeekdayRoutes.csv')
 
 
 # Save Weekday routes as a txt file
-######################################################################################################################################################################
+#############################################################################################################################################################################################################
 
 textfile = open("data/SRWeekdayRouteStores.txt", "w")
 for element in chosenRouteStores:
@@ -285,13 +316,205 @@ for element in chosenRouteStores:
 textfile.close()
 
 
+# Get all possible feasible routes for saturday in each region using permutations and constraints
+#############################################################################################################################################################################################################
+
+SouthSaturday = []
+EastSaturday = []
+WestSaturday = []
+NorthSaturday = []
+CentralSaturday = []
+# put each store into their respective region array
+for index, row in dfRegions.iterrows():
+    if row['Region'] == 'South' and 'Countdown' in row['Store'] and 'Metro' not in row['Store']:
+        SouthSaturday.append(row['Store'])
+    elif row['Region'] == 'East' and 'Countdown' in row['Store'] and 'Metro' not in row['Store']:
+        EastSaturday.append(row['Store'])
+    elif row['Region'] == 'West' and 'Countdown' in row['Store'] and 'Metro' not in row['Store']:
+        WestSaturday.append(row['Store'])
+    elif row['Region'] == 'North' and 'Countdown' in row['Store'] and 'Metro' not in row['Store']:
+        NorthSaturday.append(row['Store'])
+    elif row['Region'] == 'Central' and 'Countdown' in row['Store'] and 'Metro' not in row['Store']:
+        CentralSaturday.append(row['Store'])
+
+
+# get route permutations of stores in each region
+combSouthSaturday5 = list(permutations(SouthSaturday, 5))
+combSouthSaturday4 = list(permutations(SouthSaturday, 4))
+combSouthSaturday3 = list(permutations(SouthSaturday, 3))
+combSouthSaturday2 = list(permutations(SouthSaturday, 2))
+combSouthSaturday1 = list(permutations(SouthSaturday, 1))
+combEastSaturday5 = list(permutations(EastSaturday, 5))
+combEastSaturday4 = list(permutations(EastSaturday, 4))
+combEastSaturday3 = list(permutations(EastSaturday, 3))
+combEastSaturday2 = list(permutations(EastSaturday, 2))
+combEastSaturday1 = list(permutations(EastSaturday, 1))
+combWestSaturday5 = list(permutations(WestSaturday, 5))
+combWestSaturday4 = list(permutations(WestSaturday, 4))
+combWestSaturday3 = list(permutations(WestSaturday, 3))
+combWestSaturday2 = list(permutations(WestSaturday, 2))
+combWestSaturday1 = list(permutations(WestSaturday, 1))
+combNorthSaturday4 = list(permutations(NorthSaturday, 4))
+combNorthSaturday3 = list(permutations(NorthSaturday, 3))
+combNorthSaturday2 = list(permutations(NorthSaturday, 2))
+combNorthSaturday1 = list(permutations(NorthSaturday, 1))
+combCentralSaturday5 = list(permutations(CentralSaturday, 5))
+combCentralSaturday4 = list(permutations(CentralSaturday, 4))
+combCentralSaturday3 = list(permutations(CentralSaturday, 3))
+combCentralSaturday2 = list(permutations(CentralSaturday, 2))
+combCentralSaturday1 = list(permutations(CentralSaturday, 1))
+
+# intialise array with all route permutations for each region
+combRegionsSaturday = [combSouthSaturday5, combSouthSaturday4, combSouthSaturday3, combSouthSaturday2, 
+                        combSouthSaturday1, combEastSaturday5, combEastSaturday4, combEastSaturday3, combEastSaturday2,
+                        combEastSaturday1, combWestSaturday5, combWestSaturday4, combWestSaturday3, combWestSaturday1, 
+                        combWestSaturday2, combNorthSaturday4, combNorthSaturday3, combNorthSaturday2, combNorthSaturday1, 
+                        combCentralSaturday5, combCentralSaturday4, combCentralSaturday3, combCentralSaturday2, 
+                        combCentralSaturday1]
+
+# remove route if total demand exceeds 24 crates
+for region in combRegionsSaturday:
+    for i in range(len(region) - 1, -1, -1):
+        demand = 0
+        for store in region[i]:
+            demand = demand + countdownSaturdayMean
+        if demand > truckCapacity:
+            region.pop(i)
+
+# remove route if total duration exceeds 10000 seconds
+for region in combRegionsSaturday:
+    for i in range(len(region) - 1, -1, -1):
+        duration = len(region[0]) * unloadTime * 60 + dfDurations['Distribution Centre Auckland'][region[i][0]] + dfDurations['Distribution Centre Auckland'][region[i][-1]]
+        for j in range(len(region[0]) - 2):
+            duration = duration + dfDurations[region[i][j]][region[i][j + 1]]
+        if duration > 14400:
+            region.pop(i)
+
+
+# initialise array of feasible routes 
+feasibleRoutesSaturday = []
+# append all feasible routes into array
+for region in combRegionsSaturday:
+    for route in region:
+        feasibleRoutesSaturday.append(route)
+
+print("The number of feasible routes is :", len(feasibleRoutesSaturday))
+print("")
+
+# create a list of all stores
+allStoresSaturday = SouthSaturday + NorthSaturday + EastSaturday + WestSaturday + CentralSaturday
+missingStoresSaturday = SouthSaturday + NorthSaturday + EastSaturday + WestSaturday + CentralSaturday
+
+# check if any stores are missing from the feasible routes
+for route in feasibleRoutesSaturday:
+    for store in route:
+        if store in missingStoresSaturday:
+            missingStoresSaturday.remove(store)
+
+# if any missing stores, code is exited
+if missingStoresSaturday != []:
+    print("Not all stores are accounted for (Saturday)!")
+    exit()
+
+# initialise arrays for the lp
+lpMatIndexSaturday = np.zeros((len(feasibleRoutesSaturday)))
+lpMatRoutesSaturday = []
+lpMatCostsSaturday = np.zeros((len(feasibleRoutesSaturday)))
+
+# create the route number and get the cost for each route
+for i in range(len(feasibleRoutesSaturday)):
+    lpMatIndexSaturday[i] = i
+    lpMatRoutesSaturday.append(feasibleRoutesSaturday[i])
+    time = len(feasibleRoutesSaturday[0]) * unloadTime * 60 + dfDurations['Distribution Centre Auckland'][feasibleRoutesSaturday[i][0]] + dfDurations['Distribution Centre Auckland'][feasibleRoutesSaturday[i][-1]]
+    for j in range(len(feasibleRoutesSaturday[i]) - 2):
+        time = time + dfDurations[feasibleRoutesSaturday[i][j]][feasibleRoutesSaturday[i][j + 1]]
+    lpMatCostsSaturday[i] = round(time * hourlyTruckCost/3600, 2)
+
+# zip together arrays into one matrix
+lpMatSaturday = list(zip(lpMatIndexSaturday, lpMatRoutesSaturday, lpMatCostsSaturday))
+
+
+# Create and solve the saturday lp
+#############################################################################################################################################################################################################
+
+probSaturday =  LpProblem("WoolworthsLpSaturday", LpMinimize)
+
+routes_vars_saturday = {Route[1]: LpVariable("X_" + str(Route[0]), lowBound = 0, upBound = 1, cat = 'Binary') for Route in lpMatSaturday}
+
+# Objective function
+probSaturday += lpSum(routes_vars_saturday[lpMatSaturday[i][1]] * lpMatSaturday[i][2] for i in range(len(routes_vars_saturday))), "Total Cost of Delivering on Saturday"
+
+# Constraints added to prob
+for store in allStoresSaturday:   
+    probSaturday += lpSum(routes_vars_saturday[lpMatSaturday[i][1]] for i in range(len(routes_vars_saturday)) if store in lpMatSaturday[i][1]) == 1  # constraint that each store must be visited once
+
+print(probSaturday)
+
+# Write the lp to a file
+probSaturday.writeLP('WoolworthsLpSaturday')
+
+# Solving the problem
+probSaturday.solve()
+
+# The status of the solution is printed to the screen
+print("Status:", LpStatus[probSaturday.status])
+print("")  
+
+# Each of the chosen routes is added to an array
+chosenRouteNumsSaturday = []
+for v in probSaturday.variables():
+    if v.varValue == 1:
+        chosenRouteNumsSaturday.append(v.name)
+
+# The stores of each chosen route are added to an array
+chosenRouteStoresSaturday = []
+keys = list(routes_vars_saturday.items())
+for route_name in chosenRouteNumsSaturday:
+    for key in keys:
+        if route_name == key[1].name:
+            chosenRouteStoresSaturday.append(key[0])
+
+# Both above arrays zipped together and printed
+chosenSaturday = list(zip(chosenRouteNumsSaturday, chosenRouteStoresSaturday))
+for i in chosenSaturday:
+    print(i)
+
+# The optimised objective function (minimum cost for deliveries) printed to screen
+print("")    
+print("Minimised Cost for Saturday  =  $", round(value(probSaturday.objective), 2))
+
+
+# Save Saturday routes coordinates as a csv file
+#############################################################################################################################################################################################################
+
+
+chosenRouteCoordsSaturday = []
+for route in chosenRouteStoresSaturday:
+    Route = []
+    for store in route:
+        for i in range(0, len(dfLocations)):
+            if dfLocations.iloc[i, 1] == store:
+                Route.append([dfLocations.iloc[i, 2], dfLocations.iloc[i, 3]])
+    chosenRouteCoordsSaturday.append(Route)
+
+dfRoutes = pd.DataFrame(chosenRouteCoordsSaturday)
+
+dfRoutes.to_csv('data/SRSaturdayRoutes.csv')
+
+
+# Save Saturday routes as a txt file
+#############################################################################################################################################################################################################
+
+textfile = open("data/SRSaturdayRouteStores.txt", "w")
+for element in chosenRouteStoresSaturday:
+    for i in element:
+        textfile.write(i + ", ")
+    textfile.write("\n")
+textfile.close()
+
 
 # Simulation
-######################################################################################################################################################################
-
-# read in files
-dfDemandsWeekdays = pd.read_csv('data\SRDemandsWeekdays.csv', index_col=0)
-
+#############################################################################################################################################################################################################
 
 # create attribute based on whether a store is a Countdown store or not
 store_type = []
@@ -303,7 +526,14 @@ for store in dfDemandsWeekdays.index.values:
         
 # add attributes to dataframes
 dfDemandsWeekdays['Store_type'] = store_type
+dfDemandsSaturdays['Store_type'] = store_type
 
+# drop all stores that aren't Countdown on Saturdays (since demand is 0)
+for store in dfDemandsSaturdays.index.values:
+    if 'Countdown' in store and 'Metro' not in store:
+        continue
+    else:
+        dfDemandsSaturdays = dfDemandsSaturdays.drop(store, axis=0)
 
 # pivot the weekday data
 dfDemandsWeekdays_pivotLonger = pd.melt(dfDemandsWeekdays, id_vars=['Store_type'],  value_vars=['2021-06-14', '2021-06-15', '2021-06-16', '2021-06-17', '2021-06-18', '2021-06-21', 
@@ -312,44 +542,15 @@ dfDemandsWeekdays_pivotLonger = pd.melt(dfDemandsWeekdays, id_vars=['Store_type'
                                                                 '2021-07-08', '2021-07-09'], var_name='Date', value_name='Demand_Value')
 dfDemandsWeekdays_pivotLonger.to_csv('data/SRdfDemandsWeekdays_pivotLonger.csv')
 
-
-# plot weekday demand distribution based on whether store type is countdown or other
-plotWeekday = (ggplot(dfDemandsWeekdays_pivotLonger,  aes(x='Demand_Value')) + geom_bar(stat='count', fill="cornflowerblue") + facet_wrap('Store_type', scales = 'free') + 
-    ggtitle("Plot of Weekday Demand Distribution for \n Countdown Stores and Other Stores") + xlab("Demand (no. pallets)") + ylab("Frequency"))
-print(plotWeekday)
+# pivot the saturday data
+dfDemandsSaturdays_pivotLonger = pd.melt(dfDemandsSaturdays, id_vars=['Store_type'], value_vars=['2021-06-19', '2021-06-26', '2021-07-03', '2021-07-10'], var_name='Date', value_name='Demand_Value')
+dfDemandsSaturdays_pivotLonger.to_csv('data/SRdfDemandsSaturdays_pivotLonger.csv')
 
 
 # create and plot normal distribution for traffic delays
 mu = 40
 variance = 10
 sigma = math.sqrt(variance)
-delay = np.linspace(mu - 4*sigma, mu + 4*sigma, 10000)
-plt.plot(delay, stats.norm.pdf(delay, mu, sigma))
-plt.title("Normal Distribution to Model Delays due to Traffic")
-plt.xlabel("Time (minutes)")
-plt.ylabel("Probability")
-plt.show()
-
-# sample from weekday demand distribution for countdown stores and plot
-fig, ax1 = plt.subplots(1)
-weekendDemandsSampledCountdown = dfDemandsWeekdays_pivotLonger[dfDemandsWeekdays_pivotLonger.Store_type == 'Countdown'].Demand_Value.sample(n=100000, replace=True)
-ax1.hist(weekendDemandsSampledCountdown, bins=13, range=(2.5, 15.5), edgecolor='black', linewidth=1.2, density=True)
-ax1.xaxis.set_major_locator(MaxNLocator(integer=True))
-plt.title("Daily Demand Distribution for Countdown Stores on Weekdays with "+ removed_store + ' removed.')
-plt.xlabel("Daily Demand (no. pallets)")
-plt.ylabel("Probability")
-plt.show()
-
-# sample from weekday demand distribution for other stores  =and plot
-fig, ax2 = plt.subplots(1)
-weekendDemandsSampledOther = dfDemandsWeekdays_pivotLonger[dfDemandsWeekdays_pivotLonger.Store_type == 'Other'].Demand_Value.sample(n=100000, replace=True)
-ax2.hist(weekendDemandsSampledOther, bins=8, range=(1.5, 9.5), edgecolor='black', linewidth=1.2, density=True)
-ax2.xaxis.set_major_locator(MaxNLocator(integer=True))
-plt.title("Daily Demand Distribution for 'Other' Stores on Weekdays with "+ removed_store + ' removed.')
-plt.xlabel("Daily Demand (no. pallets)")
-plt.ylabel("Probability")
-plt.show()
-
 
 # define a function to simplify truncnorm function
 def get_truncated_normal(mean=0, sd=1, low=0, upp=10):
@@ -358,15 +559,6 @@ def get_truncated_normal(mean=0, sd=1, low=0, upp=10):
 
 # create truncated normal distribution for traffic delays       
 traffic = get_truncated_normal(mu, sigma, low=15, upp=65)
-
-# sample from truncated traffic delay distribution and plot
-trafficSampled = traffic.rvs(10000)
-fig, ax4 = plt.subplots(1)
-ax4.hist(trafficSampled, edgecolor='black', linewidth=1.2, density=True)
-plt.title("Histogram Sampled from Traffic Normal Distribution with "+ removed_store + ' removed.')
-plt.xlabel("Time (minutes)")
-plt.ylabel("Probability")
-plt.show()
 
 # initialise simulation array for daily weekday cost
 costWeekdayArray = [] 
@@ -379,7 +571,7 @@ for line in file:
         line_count_weekday += 1
 file.close()
 
-# run the monte carlo simulation 1000 times for weedays
+# run the monte carlo simulation 1000 times for weekdays
 for i in range(1000):
     # initialise variables
     costWeekday = 6226.73  # initial cost without sampling considerations
@@ -431,18 +623,82 @@ for i in range(1000):
     # append final cost to the cost array
     costWeekdayArray.append(costWeekday)
 
+# initialise simulation array for saturday cost
+costSaturdayArray = [] 
 
+# get number of routes on saturday
+file = open("data\SaturdayRouteStores.txt", "r")
+line_count_saturday = 0
+for line in file:
+    if line != "\n":
+        line_count_saturday += 1
+file.close()
 
-# plot the cost distributions for weekdays
-fig, ax1 = plt.subplots(1)
+# run the monte carlo simulation 1000 times on saturdays
+for i in range(1000):
+    # initialise variables
+    costSaturday = 4547.94  # initial cost on Saturday without sampling considerations
+    extraTrucks = 0
+    time = 0
+    # looping through routes
+    for route in chosenRouteStoresSaturday:
+        # intialise array for demand at each store in the route
+        demand = []
+        # add the duration of each route to the time
+        for routeCost in lpMatSaturday:
+            if route == routeCost[1]:
+                time += routeCost[2]*3600/hourlyTruckCost
+        # looping through each store in the route
+        for store in route:
+            # sampling from demand distributions based on the store type
+            dfDemandsSaturdays_pivotLonger[dfDemandsSaturdays_pivotLonger.Store_type == 'Countdown'].Demand_Value.sample(n=1, replace=True)
+        # turn tuple into list so it is mutable
+        route = list(route)
+        # if demand is exceeded then remove the first store from the route
+        while np.sum(demand) > truckCapacity:
+            demand.pop(0)
+            storeRemoved = route.pop(0)
+            extraTrucks += 1
+            # change routes and thus overall time
+            time = time - dfDurations[storeRemoved][route[0]] + dfDurations['Distribution Centre Auckland'][route[0]]  + dfDurations[storeRemoved]['Distribution Centre Auckland']
+    # if all trucks are used up then use wetlease trucks
+    if extraTrucks > (numTrucks - line_count_saturday):
+        # get random delay for each route and add it to the time and cost
+        for i in range(numTrucks):
+            # getting a random delay from the truncated normal traffic distribution
+            randDelay = traffic.rvs()
+            costSaturday += randDelay*60*hourlyTruckCost/3600
+            time += randDelay*60
+            # wet lease trucks
+            costSaturday += (extraTrucks - numTrucks)*wetleaseCost
+    else:
+        # get random delay for each route and add it to the time and cost
+        for i in range(line_count_saturday + extraTrucks):
+            randDelay = traffic.rvs()
+            costSaturday += randDelay*60*hourlyTruckCost/3600
+            time += randDelay*60
+    if time > 14400:
+        # if four hours exceeded for route then add overtime
+        costSaturday += (time - 14400)*(overtimeTruckCost - hourlyTruckCost)/3600
+    # append final cost to the cost array
+    costSaturdayArray.append(costSaturday)
+
+# plot the cost distributions for weekdays and saturdays
+fig, (ax1, ax2) = plt.subplots(1, 2)
 ax1.hist(costWeekdayArray, edgecolor='black', linewidth=1.2, density=True)
-
-ax1.set_title("Daily Cost Distribution for Weekdays with "+ removed_store + ' removed.')
+ax2.hist(costSaturdayArray, edgecolor='black', linewidth=1.2, density=True)
+ax1.set_title("Daily Cost Distribution for Weekdays with" + removed_store + ' removed.')
 ax1.set_xlabel("Daily Cost ($)")
 ax1.set_ylabel("Probability")
-
+ax2.set_title("Daily Cost Distribution for Saturdays with" + removed_store + ' removed.')
+ax2.set_xlabel("Daily Cost ($)")
+ax2.set_ylabel("Probability")
 plt.show()
 
 print("")
+print("95% Confidence interval for weekdays with " + removed_store + ' removed is', sms.DescrStatsW(costWeekdayArray).tconfint_mean(alpha=0.05))
 print("")
-print("Confidence interval for weekdays is ", sms.DescrStatsW(costWeekdayArray).tconfint_mean(alpha=0.05))
+print("95% Confidence interval for weekdays with " + removed_store + ' removed is', sms.DescrStatsW(costSaturdayArray).tconfint_mean(alpha=0.05))
+print("")
+
+#############################################################################################################################################################################################################
