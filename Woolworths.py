@@ -175,9 +175,6 @@ for region in combRegions:
     for route in region:
         feasibleRoutes.append(route)
 
-print("The number of feasible routes is :", len(feasibleRoutes))
-print("")
-
 # create a list of all stores
 allStores = South + North + East + West + Central
 missingStores = South + North + East + West + Central
@@ -225,17 +222,11 @@ probWeekday += lpSum(routes_vars[lpMat[i][1]] * lpMat[i][2] for i in range(len(r
 for store in allStores:   
     probWeekday += lpSum(routes_vars[lpMat[i][1]] for i in range(len(routes_vars)) if store in lpMat[i][1]) == 1  # constraint that each store must be visited once
 
-print(probWeekday)
-
 # Write the lp to a file
 probWeekday.writeLP('WoolworthsLpWeekday')
 
 # Solving the problem
-probWeekday.solve()
-
-# The status of the solution is printed to the screen
-print("Status:", LpStatus[probWeekday.status])
-print("")  
+probWeekday.solve(PULP_CBC_CMD(msg=0))
 
 # Each of the chosen routes is added to an array
 chosenRouteNums = []
@@ -251,15 +242,37 @@ for route_name in chosenRouteNums:
         if route_name == key[1].name:
             chosenRouteStores.append(key[0])
 
+print("")  
+print("")  
+print("")  
+print("###########")
+print("  WEEKDAY  ")
+print("###########")
+print("")
+print("")
+
+print("Generating feasible routes...")
+print("Done.", len(feasibleRoutes), "feasible routes generated", )
+print("")
+print("")   
+
+print("Solving LP...")
+# The status of the solution is printed to the screen
+print("Done. Status of the LP is", LpStatus[probWeekday.status])
+# The optimised objective function (minimum cost for deliveries) printed to screen
+print(len(chosenRouteStores), "routes selected")  
+print("Optimal Cost for Weekdays  =  $", round(value(probWeekday.objective), 2))  
+print("")   
+print("")   
+
+print("Selected routes:")
+print("") 
+
 # Both above arrays zipped together and printed
 chosen = list(zip(chosenRouteNums, chosenRouteStores))
 for i in chosen:
     print(i)
 
-# The optimised objective function (minimum cost for deliveries) printed to screen
-print("")    
-print("Minimised Cost for Weedays  =  $", round(value(probWeekday.objective), 2))
-print("")    
 print("")    
 print("")    
 
@@ -374,9 +387,6 @@ for region in combRegionsSaturday:
     for route in region:
         feasibleRoutesSaturday.append(route)
 
-print("The number of feasible routes is :", len(feasibleRoutesSaturday))
-print("")
-
 # create a list of all stores
 allStoresSaturday = SouthSaturday + NorthSaturday + EastSaturday + WestSaturday + CentralSaturday
 missingStoresSaturday = SouthSaturday + NorthSaturday + EastSaturday + WestSaturday + CentralSaturday
@@ -424,17 +434,11 @@ probSaturday += lpSum(routes_vars_saturday[lpMatSaturday[i][1]] * lpMatSaturday[
 for store in allStoresSaturday:   
     probSaturday += lpSum(routes_vars_saturday[lpMatSaturday[i][1]] for i in range(len(routes_vars_saturday)) if store in lpMatSaturday[i][1]) == 1  # constraint that each store must be visited once
 
-print(probSaturday)
-
 # Write the lp to a file
 probSaturday.writeLP('WoolworthsLpSaturday')
 
 # Solving the problem
-probSaturday.solve()
-
-# The status of the solution is printed to the screen
-print("Status:", LpStatus[probSaturday.status])
-print("")  
+probSaturday.solve(PULP_CBC_CMD(msg=0))
 
 # Each of the chosen routes is added to an array
 chosenRouteNumsSaturday = []
@@ -450,14 +454,39 @@ for route_name in chosenRouteNumsSaturday:
         if route_name == key[1].name:
             chosenRouteStoresSaturday.append(key[0])
 
+print("")  
+print("")  
+print("")  
+print("############")
+print("  SATURDAY  ")
+print("############")
+print("")
+print("")
+
+print("Generating feasible routes...")
+print("Done.", len(feasibleRoutesSaturday), "feasible routes generated", )
+print("")
+print("")   
+
+print("Solving LP...")
+# The status of the solution is printed to the screen
+print("Done. Status of the LP is", LpStatus[probSaturday.status])
+# The optimised objective function (minimum cost for deliveries) printed to screen
+print(len(chosenRouteStoresSaturday), "routes selected")  
+print("Optimal Cost for Saturdays  =  $", round(value(probSaturday.objective), 2))  
+print("")   
+print("")   
+
+print("Selected routes:")
+print("") 
+
 # Both above arrays zipped together and printed
 chosenSaturday = list(zip(chosenRouteNumsSaturday, chosenRouteStoresSaturday))
 for i in chosenSaturday:
     print(i)
 
-# The optimised objective function (minimum cost for deliveries) printed to screen
 print("")    
-print("Minimised Cost for Saturday  =  $", round(value(probSaturday.objective), 2))
+print("")    
 
 
 # Save Saturday routes coordinates as a csv file
@@ -726,10 +755,36 @@ ax2.set_xlabel("Daily Cost ($)")
 ax2.set_ylabel("Probability")
 plt.show()
 
+print("")  
+print("")  
+print("")  
+print("###########")
+print("  WEEKDAY  ")
+print("###########")
 print("")
-print("95% Confidence interval for weekdays is", sms.DescrStatsW(costWeekdayArray).tconfint_mean(alpha=0.05))
 print("")
-print("95% Confidence interval for weekdays is", sms.DescrStatsW(costSaturdayArray).tconfint_mean(alpha=0.05))
+
+print("Running Monte Carlo simulation for 1000 samples...")
+print("Done")
+print("")
+
+print("Computing 95% confidence interval for weekdays...")
+print("Done. Mean cost for weekdays is between $", round(value(sms.DescrStatsW(costWeekdayArray).tconfint_mean(alpha=0.05)[0]), 2), "and $", round(value(sms.DescrStatsW(costWeekdayArray).tconfint_mean(alpha=0.05)[1]), 2))
+print("")  
+print("")  
+print("")  
+print("############")
+print("  SATURDAY  ")
+print("############")
+print("")
+print("")
+
+print("Running Monte Carlo simulation for 1000 samples...")
+print("Done")
+print("")
+
+print("Computing 95% confidence interval for weekdays...")
+print("Done. Mean cost for weekdays is between $", round(value(sms.DescrStatsW(costSaturdayArray).tconfint_mean(alpha=0.05)[0]), 2), "and $", round(value(sms.DescrStatsW(costSaturdayArray).tconfint_mean(alpha=0.05)[1]), 2))
 print("")
 
 #############################################################################################################################################################################################################
