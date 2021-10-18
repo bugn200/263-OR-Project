@@ -45,7 +45,8 @@ for i in dfDistances:
             min=dfDistances[i].iloc[j]
             I = i
             J = j
-
+print("")
+print("")
 print('The two closest stores are ' + I + ' and '+  dfDistances.iloc[J].name + ', we will consider dropping ' + dfDistances.iloc[J].name)
 removed_store = dfDemandsWeekdays.iloc[J].name
 dfDemandsWeekdays=dfDemandsWeekdays.drop(removed_store, axis=0)
@@ -169,7 +170,8 @@ combCentral2 = list(permutations(Central, 2))
 combCentral1 = list(permutations(Central, 1))
 
 # intialise array with all route permutations for each region
-combRegions = [combSouth4, combSouth3, combSouth2, combSouth1, combEast4, combEast3, combEast2, combEast1, combWest5, combWest4, combWest3, combWest1, combWest2, combNorth3, combNorth2, combNorth1, combCentral4, combCentral3, combCentral2, combCentral1]
+combRegions = [combSouth4, combSouth3, combSouth2, combSouth1, combEast4, combEast3, combEast2, combEast1, combWest5, combWest4, combWest3, 
+                combWest1, combWest2, combNorth3, combNorth2, combNorth1, combCentral4, combCentral3, combCentral2, combCentral1]
 
 # remove route if total demand exceeds 24 crates
 for region in combRegions:
@@ -198,9 +200,6 @@ feasibleRoutes = []
 for region in combRegions:
     for route in region:
         feasibleRoutes.append(route)
-
-print("The number of feasible routes is :", len(feasibleRoutes))
-print("")
 
 # create a list of all stores
 allStores = South + North + East + West + Central
@@ -249,17 +248,12 @@ probWeekday += lpSum(routes_vars[lpMat[i][1]] * lpMat[i][2] for i in range(len(r
 for store in allStores:   
     probWeekday += lpSum(routes_vars[lpMat[i][1]] for i in range(len(routes_vars)) if store in lpMat[i][1]) == 1  # constraint that each store must be visited once
 
-print(probWeekday)
-
 # Write the lp to a file
 probWeekday.writeLP('SRWoolworthsLpWeekday')
 
 # Solving the problem
-probWeekday.solve()
+probWeekday.solve(PULP_CBC_CMD(msg=0))
 
-# The status of the solution is printed to the screen
-print("Status:", LpStatus[probWeekday.status])
-print("")  
 
 # Each of the chosen routes is added to an array
 chosenRouteNums = []
@@ -275,17 +269,39 @@ for route_name in chosenRouteNums:
         if route_name == key[1].name:
             chosenRouteStores.append(key[0])
 
+print("")  
+print("")  
+print("")  
+print("################################################")
+print("  WEEKDAY WITH " + removed_store.upper() + ' REMOVED')
+print("################################################")
+print("")
+print("")
+
+print("Generating feasible routes...")
+print("Done.", len(feasibleRoutes), "feasible routes generated", )
+print("")
+print("")   
+
+print("Solving LP...")
+# The status of the solution is printed to the screen
+print("Done. Status of the LP is", LpStatus[probWeekday.status])
+# The optimised objective function (minimum cost for deliveries) printed to screen
+print(len(chosenRouteStores), "routes selected")  
+print("Optimal Cost for Weekdays with " + removed_store + " removed  =  $", round(value(probWeekday.objective), 2))  
+print("")   
+print("")   
+
+print("Selected routes:")
+print("") 
+
 # Both above arrays zipped together and printed
 chosen = list(zip(chosenRouteNums, chosenRouteStores))
 for i in chosen:
     print(i)
 
-# The optimised objective function (minimum cost for deliveries) printed to screen
 print("")    
-print("Minimised Cost for Weekdays  =  $", round(value(probWeekday.objective), 2))
-print("")    
-print("")    
-print("")    
+print("")       
 
 
 # Save Weekday routes coordinates to a csv file
@@ -398,9 +414,6 @@ for region in combRegionsSaturday:
     for route in region:
         feasibleRoutesSaturday.append(route)
 
-print("The number of feasible routes is :", len(feasibleRoutesSaturday))
-print("")
-
 # create a list of all stores
 allStoresSaturday = SouthSaturday + NorthSaturday + EastSaturday + WestSaturday + CentralSaturday
 missingStoresSaturday = SouthSaturday + NorthSaturday + EastSaturday + WestSaturday + CentralSaturday
@@ -448,17 +461,12 @@ probSaturday += lpSum(routes_vars_saturday[lpMatSaturday[i][1]] * lpMatSaturday[
 for store in allStoresSaturday:   
     probSaturday += lpSum(routes_vars_saturday[lpMatSaturday[i][1]] for i in range(len(routes_vars_saturday)) if store in lpMatSaturday[i][1]) == 1  # constraint that each store must be visited once
 
-print(probSaturday)
-
 # Write the lp to a file
 probSaturday.writeLP('WoolworthsLpSaturday')
 
 # Solving the problem
-probSaturday.solve()
+probSaturday.solve(PULP_CBC_CMD(msg=0))
 
-# The status of the solution is printed to the screen
-print("Status:", LpStatus[probSaturday.status])
-print("")  
 
 # Each of the chosen routes is added to an array
 chosenRouteNumsSaturday = []
@@ -474,14 +482,39 @@ for route_name in chosenRouteNumsSaturday:
         if route_name == key[1].name:
             chosenRouteStoresSaturday.append(key[0])
 
+print("")  
+print("")  
+print("")  
+print("#################################################")
+print("  SATURDAY WITH " + removed_store.upper() + ' REMOVED' )
+print("#################################################")
+print("")
+print("")
+
+print("Generating feasible routes...")
+print("Done.", len(feasibleRoutesSaturday), "feasible routes generated", )
+print("")
+print("")   
+
+print("Solving LP...")
+# The status of the solution is printed to the screen
+print("Done. Status of the LP is", LpStatus[probSaturday.status])
+# The optimised objective function (minimum cost for deliveries) printed to screen
+print(len(chosenRouteStoresSaturday), "routes selected")  
+print("Optimal Cost for Weekdays with " + removed_store + " removed  =  $", round(value(probSaturday.objective), 2))  
+print("")   
+print("")   
+
+print("Selected routes:")
+print("") 
+
 # Both above arrays zipped together and printed
-chosenSaturday = list(zip(chosenRouteNumsSaturday, chosenRouteStoresSaturday))
-for i in chosenSaturday:
+chosen = list(zip(chosenRouteNumsSaturday, chosenRouteStoresSaturday))
+for i in chosen:
     print(i)
 
-# The optimised objective function (minimum cost for deliveries) printed to screen
 print("")    
-print("Minimised Cost for Saturday  =  $", round(value(probSaturday.objective), 2))
+print("")  
 
 
 # Save Saturday routes coordinates as a csv file
@@ -687,18 +720,44 @@ for i in range(1000):
 fig, (ax1, ax2) = plt.subplots(1, 2)
 ax1.hist(costWeekdayArray, edgecolor='black', linewidth=1.2, density=True)
 ax2.hist(costSaturdayArray, edgecolor='black', linewidth=1.2, density=True)
-ax1.set_title("Daily Cost Distribution for Weekdays with" + removed_store + ' removed.')
+ax1.set_title("Daily Cost Distribution for Weekdays with " + removed_store + ' removed.')
 ax1.set_xlabel("Daily Cost ($)")
 ax1.set_ylabel("Probability")
-ax2.set_title("Daily Cost Distribution for Saturdays with" + removed_store + ' removed.')
+ax2.set_title("Daily Cost Distribution for Saturdays with " + removed_store + ' removed.')
 ax2.set_xlabel("Daily Cost ($)")
 ax2.set_ylabel("Probability")
 plt.show()
 
+print("")  
+print("")  
+print("")  
+print("################################################")
+print("  WEEKDAY WITH " + removed_store.upper() + ' REMOVED' )
+print("################################################")
 print("")
-print("95% Confidence interval for weekdays with " + removed_store + ' removed is', sms.DescrStatsW(costWeekdayArray).tconfint_mean(alpha=0.05))
 print("")
-print("95% Confidence interval for weekdays with " + removed_store + ' removed is', sms.DescrStatsW(costSaturdayArray).tconfint_mean(alpha=0.05))
+
+print("Running Monte Carlo simulation for 1000 samples...")
+print("Done")
+print("")
+
+print("Computing 95% confidence interval for weekdays...")
+print("Done. Mean cost for weekdays is between $", round(value(sms.DescrStatsW(costWeekdayArray).tconfint_mean(alpha=0.05)[0]), 2), "and $", round(value(sms.DescrStatsW(costWeekdayArray).tconfint_mean(alpha=0.05)[1]), 2))
+print("")  
+print("")  
+print("")  
+print("#################################################")
+print("  SATURDAY WITH " + removed_store.upper() + ' REMOVED' )
+print("#################################################")
+print("")
+print("")
+
+print("Running Monte Carlo simulation for 1000 samples...")
+print("Done")
+print("")
+
+print("Computing 95% confidence interval for weekdays...")
+print("Done. Mean cost for Saturdays is between $", round(value(sms.DescrStatsW(costSaturdayArray).tconfint_mean(alpha=0.05)[0]), 2), "and $", round(value(sms.DescrStatsW(costSaturdayArray).tconfint_mean(alpha=0.05)[1]), 2))
 print("")
 
 #############################################################################################################################################################################################################
