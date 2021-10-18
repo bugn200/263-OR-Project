@@ -1,7 +1,7 @@
 ,Store_type,Date,Demand_Value
 0,Countdown,2021-06-14,5
 1,Countdown,2021-06-14,6
-2,Countdown,2021-06-14,9
+2,Countdown,2021-06-14,13
 3,Countdown,2021-06-14,9
 4,Countdown,2021-06-14,6
 5,Countdown,2021-06-14,9
@@ -65,7 +65,7 @@
 63,Other,2021-06-14,3
 64,Countdown,2021-06-15,6
 65,Countdown,2021-06-15,8
-66,Countdown,2021-06-15,9
+66,Countdown,2021-06-15,13
 67,Countdown,2021-06-15,4
 68,Countdown,2021-06-15,8
 69,Countdown,2021-06-15,11
@@ -129,7 +129,7 @@
 127,Other,2021-06-15,3
 128,Countdown,2021-06-16,10
 129,Countdown,2021-06-16,5
-130,Countdown,2021-06-16,8
+130,Countdown,2021-06-16,12
 131,Countdown,2021-06-16,8
 132,Countdown,2021-06-16,7
 133,Countdown,2021-06-16,7
@@ -193,7 +193,7 @@
 191,Other,2021-06-16,4
 192,Countdown,2021-06-17,11
 193,Countdown,2021-06-17,8
-194,Countdown,2021-06-17,7
+194,Countdown,2021-06-17,10
 195,Countdown,2021-06-17,10
 196,Countdown,2021-06-17,6
 197,Countdown,2021-06-17,11
@@ -257,7 +257,7 @@
 255,Other,2021-06-17,3
 256,Countdown,2021-06-18,7
 257,Countdown,2021-06-18,8
-258,Countdown,2021-06-18,14
+258,Countdown,2021-06-18,21
 259,Countdown,2021-06-18,7
 260,Countdown,2021-06-18,6
 261,Countdown,2021-06-18,9
@@ -321,7 +321,7 @@
 319,Other,2021-06-18,4
 320,Countdown,2021-06-21,7
 321,Countdown,2021-06-21,8
-322,Countdown,2021-06-21,6
+322,Countdown,2021-06-21,9
 323,Countdown,2021-06-21,5
 324,Countdown,2021-06-21,9
 325,Countdown,2021-06-21,8
@@ -385,7 +385,7 @@
 383,Other,2021-06-21,7
 384,Countdown,2021-06-22,8
 385,Countdown,2021-06-22,8
-386,Countdown,2021-06-22,10
+386,Countdown,2021-06-22,15
 387,Countdown,2021-06-22,6
 388,Countdown,2021-06-22,4
 389,Countdown,2021-06-22,8
@@ -449,7 +449,7 @@
 447,Other,2021-06-22,4
 448,Countdown,2021-06-23,5
 449,Countdown,2021-06-23,13
-450,Countdown,2021-06-23,6
+450,Countdown,2021-06-23,9
 451,Countdown,2021-06-23,12
 452,Countdown,2021-06-23,8
 453,Countdown,2021-06-23,10
@@ -513,7 +513,7 @@
 511,Other,2021-06-23,2
 512,Countdown,2021-06-24,8
 513,Countdown,2021-06-24,11
-514,Countdown,2021-06-24,5
+514,Countdown,2021-06-24,7
 515,Countdown,2021-06-24,10
 516,Countdown,2021-06-24,10
 517,Countdown,2021-06-24,9
@@ -577,7 +577,7 @@
 575,Other,2021-06-24,5
 576,Countdown,2021-06-25,3
 577,Countdown,2021-06-25,8
-578,Countdown,2021-06-25,6
+578,Countdown,2021-06-25,9
 579,Countdown,2021-06-25,11
 580,Countdown,2021-06-25,9
 581,Countdown,2021-06-25,8
@@ -641,7 +641,7 @@
 639,Other,2021-06-25,6
 640,Countdown,2021-06-28,6
 641,Countdown,2021-06-28,6
-642,Countdown,2021-06-28,8
+642,Countdown,2021-06-28,12
 643,Countdown,2021-06-28,7
 644,Countdown,2021-06-28,6
 645,Countdown,2021-06-28,7
@@ -705,7 +705,7 @@
 703,Other,2021-06-28,2
 704,Countdown,2021-06-29,10
 705,Countdown,2021-06-29,8
-706,Countdown,2021-06-29,8
+706,Countdown,2021-06-29,12
 707,Countdown,2021-06-29,5
 708,Countdown,2021-06-29,7
 709,Countdown,2021-06-29,7
@@ -769,7 +769,7 @@
 767,Other,2021-06-29,6
 768,Countdown,2021-06-30,5
 769,Countdown,2021-06-30,9
-770,Countdown,2021-06-30,10
+770,Countdown,2021-06-30,15
 771,Countdown,2021-06-30,10
 772,Countdown,2021-06-30,9
 773,Countdown,2021-06-30,8
@@ -833,7 +833,7 @@
 831,Other,2021-06-30,6
 832,Countdown,2021-07-01,6
 833,Countdown,2021-07-01,10
-834,Countdown,2021-07-01,3
+834,Countdown,2021-07-01,4
 835,Countdown,2021-07-01,10
 836,Countdown,2021-07-01,9
 837,Countdown,2021-07-01,8
@@ -897,7 +897,7 @@
 895,Other,2021-07-01,3
 896,Countdown,2021-07-02,7
 897,Countdown,2021-07-02,6
-898,Countdown,2021-07-02,10
+898,Countdown,2021-07-02,15
 899,Countdown,2021-07-02,7
 900,Countdown,2021-07-02,7
 901,Countdown,2021-07-02,6
@@ -961,7 +961,7 @@
 959,Other,2021-07-02,3
 960,Countdown,2021-07-05,8
 961,Countdown,2021-07-05,11
-962,Countdown,2021-07-05,7
+962,Countdown,2021-07-05,10
 963,Countdown,2021-07-05,9
 964,Countdown,2021-07-05,8
 965,Countdown,2021-07-05,11
@@ -1025,7 +1025,7 @@
 1023,Other,2021-07-05,3
 1024,Countdown,2021-07-06,6
 1025,Countdown,2021-07-06,7
-1026,Countdown,2021-07-06,9
+1026,Countdown,2021-07-06,13
 1027,Countdown,2021-07-06,9
 1028,Countdown,2021-07-06,8
 1029,Countdown,2021-07-06,6
@@ -1089,7 +1089,7 @@
 1087,Other,2021-07-06,4
 1088,Countdown,2021-07-07,8
 1089,Countdown,2021-07-07,7
-1090,Countdown,2021-07-07,4
+1090,Countdown,2021-07-07,6
 1091,Countdown,2021-07-07,5
 1092,Countdown,2021-07-07,4
 1093,Countdown,2021-07-07,8
@@ -1153,7 +1153,7 @@
 1151,Other,2021-07-07,7
 1152,Countdown,2021-07-08,9
 1153,Countdown,2021-07-08,9
-1154,Countdown,2021-07-08,6
+1154,Countdown,2021-07-08,9
 1155,Countdown,2021-07-08,4
 1156,Countdown,2021-07-08,10
 1157,Countdown,2021-07-08,9
@@ -1217,7 +1217,7 @@
 1215,Other,2021-07-08,7
 1216,Countdown,2021-07-09,7
 1217,Countdown,2021-07-09,5
-1218,Countdown,2021-07-09,9
+1218,Countdown,2021-07-09,13
 1219,Countdown,2021-07-09,12
 1220,Countdown,2021-07-09,3
 1221,Countdown,2021-07-09,4
