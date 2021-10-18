@@ -1,9 +1,19 @@
+# In case you missed any of the packages, uncomment and run the respective line
+# install.packages('sf')
+# install.packages('spData')
+# install.packages('tidyverse')
+# install.packages('tmap')
+# install.packages('OpenStreetMap')
+# install.packages('raster')
+# install.packages('rgdal')
+# install.packages('osrm')
 library(sf)
 library(spData)
 library (tidyverse)
 library(tmap)
-library(mapedit)
-library(OpenStreetMap)
+# Use these lines if you MISS any .tif file in the Shape_files folder only
+# Sys.setenv(JAVA_HOME=your_java_path_here)
+# library(OpenStreetMap)
 library(raster)
 library(rgdal)
 library(osrm)
@@ -79,53 +89,39 @@ South_sat_route=filter(s,Region=='South')
 East_sat_route=filter(s,Region=='East')
 West_sat_route=filter(s,Region=='West')
 Central_sat_route=filter(s,Region=='Central')
-#Save the North shape as a raster for reusability
-akl_North=openmap(as.numeric(st_bbox(North_shape))[c(4,1)],as.numeric(st_bbox(North_shape))[c(2,3)],type='osm')
-akl_North=openproj(akl_North)
-North_raster=raster(akl_North)
-North_raster=writeRaster(North_raster,'Shape_files/North.tif',format='GTiff',overwrite=TRUE)
-#If the file is available in Shape_files, run this command only
+#Save the regional shape as a tif file for reusability(Only use them if you don't have any specific tif file in the Shape_files folder)
+# akl_North=openmap(as.numeric(st_bbox(North_shape))[c(4,1)],as.numeric(st_bbox(North_shape))[c(2,3)],type='osm')
+# akl_North=openproj(akl_North)
+# North_raster=raster(akl_North)
+# North_raster=writeRaster(North_raster,'Shape_files/North.tif',format='GTiff',overwrite=TRUE)
+# akl_South=openmap(as.numeric(st_bbox(South_shape))[c(4,1)],as.numeric(st_bbox(South_shape))[c(2,3)],type='osm')
+# akl_South=openproj(akl_South)
+# South_raster=raster(akl_South)
+# South_raster=writeRaster(South_raster,'Shape_files/South.tif',format='GTiff')
+# akl_East=openmap(as.numeric(st_bbox(East_shape))[c(4,1)],as.numeric(st_bbox(East_shape))[c(2,3)],type='osm')
+# akl_East=openproj(akl_East)
+# East_raster=raster(akl_East)
+# East_raster=writeRaster(East_raster,'Shape_files/East.tif',format='GTiff')
+# akl_West=openmap(as.numeric(st_bbox(West_shape))[c(4,1)],as.numeric(st_bbox(West_shape))[c(2,3)],type='osm')
+# akl_West=openproj(akl_West)
+# West_raster=raster(akl_West)
+# West_raster=writeRaster(West_raster,'Shape_files/West.tif',format='GTiff')
+# akl_Central=openmap(as.numeric(st_bbox(Central_shape))[c(4,1)],as.numeric(st_bbox(Central_shape))[c(2,3)],type='osm')
+# akl_Central=openproj(akl_Central)
+# Central_raster=raster(akl_Central)
+# Central_raster=writeRaster(Central_raster,'Shape_files/Central.tif',format='GTiff')
+# akl_map=openmap(as.numeric(st_bbox(akl_shape1))[c(4,1)],as.numeric(st_bbox(akl_shape1))[c(2,3)],type='osm')
+# akl_map=openproj(akl_map)
+# akl_raster=raster(akl_map)
+# akl_raster=writeRaster(akl_raster,'Shape_files/Auckland.tif',format='GTiff')
+
+
+#If these .tif files is inside the Shape_files folder, run these command only
 North_raster=raster('Shape_files/North.tif')
-
-#Save the South shape as a raster for reusability
-akl_South=openmap(as.numeric(st_bbox(South_shape))[c(4,1)],as.numeric(st_bbox(South_shape))[c(2,3)],type='osm')
-akl_South=openproj(akl_South)
-South_raster=raster(akl_South)
-South_raster=writeRaster(South_raster,'Shape_files/South.tif',format='GTiff')
-#If the file is available in Shape_files,run this command only
 South_raster=raster('Shape_files/South.tif')
-
-
-#Save the East shape as a raster for reusability
-akl_East=openmap(as.numeric(st_bbox(East_shape))[c(4,1)],as.numeric(st_bbox(East_shape))[c(2,3)],type='osm')
-akl_East=openproj(akl_East)
-East_raster=raster(akl_East)
-East_raster=writeRaster(East_raster,'Shape_files/East.tif',format='GTiff')
-#If the file is available in Shape_files,run this command only
 East_raster=raster('Shape_files/East.tif')
-
-#Save the West shape as a raster for reusability
-akl_West=openmap(as.numeric(st_bbox(West_shape))[c(4,1)],as.numeric(st_bbox(West_shape))[c(2,3)],type='osm')
-akl_West=openproj(akl_West)
-West_raster=raster(akl_West)
-West_raster=writeRaster(West_raster,'Shape_files/West.tif',format='GTiff')
-#If the file is saved in Shape_files,run this command only
 West_raster=raster('Shape_files/West.tif')
-
-
-#Save the Central shape as a raster for reusability
-akl_Central=openmap(as.numeric(st_bbox(Central_shape))[c(4,1)],as.numeric(st_bbox(Central_shape))[c(2,3)],type='osm')
-akl_Central=openproj(akl_Central)
-Central_raster=raster(akl_Central)
-Central_raster=writeRaster(Central_raster,'Shape_files/Central.tif',format='GTiff')
-#If the file is saved in Shape_files,run this command only
 Central_raster=raster('Shape_files/Central.tif')
-#Create the tif file for Auckland map for reusability
-akl_map=openmap(as.numeric(st_bbox(akl_shape1))[c(4,1)],as.numeric(st_bbox(akl_shape1))[c(2,3)],type='osm')
-akl_map=openproj(akl_map)
-akl_raster=raster(akl_map)
-akl_raster=writeRaster(akl_raster,'Shape_files/Auckland.tif',format='GTiff')
-#If the tif file is available, run this command only
 akl_raster=raster('Shape_files/Auckland.tif')
 
 #Plot the map for each region

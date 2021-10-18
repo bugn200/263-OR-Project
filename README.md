@@ -1,15 +1,21 @@
 # 263-OR-Project
-This is our project for ENGSCI263 Operations Research.
+This is our repository for group 19 ENGSCI263 Operations Research project. Our team members are Alex Jenkin, Callum Collier and Ba Trieu Minh Nguyen.  
 
-## Group Model and Initial Results
+## Purpose  
+Worthwools New Zealand wishes to find the optimal trucking route and investigating on the impact that it will have if they close down a store in Auckland region.  
 
-In order to get our intial results for the objective values of delivering on weekdays and on saturday, you should run 
-WoolworthsLp.py. This should give identical results to those seen in our Group Model document. 
-
-For weekdays, you should get the results shown below,
-
-![lpweekday.PNG](/lpweekday.PNG)
-
-and for Saturday, you should get the following results.
-
-![lpsaturday.PNG](/lpsaturday.PNG)
+## Contents  
+### data folder:  
+This includes our raw data along with the processed data and the output routes.  
+### Shape_files folder:  
+This includes our shape file for the New Zealand shape, based on the Territorial authority shape file on LiNZ and also the tif file for raster visualisation.  
+### Plot folder:  
+This includes all of our plots used for geospatial modelling and simulation.  
+### GeospatialDataVis.R and GeospatialFunctions.R:  
+These R files are used for geospatial modelling.  
+### Woolworths.py:  
+This python file is for solving our LP for normal scenario and simulation process.  
+### StoreRemoveLP.py:  
+This python file is for investigating the impact when we remove a store in Auckland.  
+  
+Other files excluding our .pdf files are for saving the LP.
