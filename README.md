@@ -12,7 +12,7 @@ This includes our shape file for the New Zealand shape, based on the Territorial
 ### Plot folder:  
 This includes all of our plots used for geospatial modelling and simulation.  
 ### GeospatialDataVis.R and GeospatialFunctions.R:  
-These R files are used for geospatial modelling.  
+These R files are used for geospatial modelling. Run through lines in GeospatialDataVis.R to get the plot similar to the Plot folder  
 ### Woolworths.py:  
 This python file is for solving our LP for normal scenario and simulation process.  
 ### StoreRemoveLP.py:  
